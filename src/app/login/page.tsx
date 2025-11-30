@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react'; // Suspense eklendi
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
 import { Mail, Lock, ArrowRight, Play, CheckCircle2, Mic, Pause } from 'lucide-react';
 
-export default function LoginPage() {
+// --- İÇ BİLEŞEN (useSearchParams kullanan kısım) ---
+function LoginForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams(); // Hata veren kısım artık bu alt bileşende
   const { data: session, status } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [isPlayingDemo, setIsPlayingDemo] = useState(false);
@@ -102,9 +103,9 @@ export default function LoginPage() {
 
       {/* --- ANA KART (CENTERED CARD) --- */}
       <div className="bg-white w-full max-w-5xl rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.05)] border border-slate-100 overflow-hidden relative z-10 grid lg:grid-cols-2">
-         
-         {/* SOL TARAF: FORM ALANI (Mobilde Üstte Görünsün Diye Order-1) */}
-         <div className="p-8 lg:p-16 flex flex-col justify-center order-1 lg:order-1">
+          
+          {/* SOL TARAF: FORM ALANI (Mobilde Üstte Görünsün Diye Order-1) */}
+          <div className="p-8 lg:p-16 flex flex-col justify-center order-1 lg:order-1">
             
             {/* Logo */}
             <div className="flex items-center gap-2 mb-10">
@@ -200,10 +201,10 @@ export default function LoginPage() {
                </button>
             </div>
 
-         </div>
+          </div>
 
-         {/* SAĞ TARAF: GÖRSEL & DEMO (Mobilde Altta Görünsün Diye Order-2) */}
-         <div className="bg-slate-50 relative p-8 lg:p-16 flex flex-col justify-between order-2 lg:order-2 overflow-hidden min-h-[500px] lg:min-h-auto">
+          {/* SAĞ TARAF: GÖRSEL & DEMO (Mobilde Altta Görünsün Diye Order-2) */}
+          <div className="bg-slate-50 relative p-8 lg:p-16 flex flex-col justify-between order-2 lg:order-2 overflow-hidden min-h-[500px] lg:min-h-auto">
             
             {/* Dekoratif Gradientler (Blurry Blobs) */}
             <div className="absolute top-[-20%] right-[-20%] w-96 h-96 bg-blue-200 rounded-full blur-[80px] opacity-40"></div>
@@ -277,15 +278,29 @@ export default function LoginPage() {
                <span>256-bit SSL ile güvenli bağlantı</span>
             </div>
 
-         </div>
+          </div>
 
       </div>
 
       {/* Footer Copyright */}
       <div className="absolute bottom-4 text-xs text-slate-400">
-         © 2024 Yankı AI. Tüm hakları saklıdır.
+          © 2024 Yankı AI. Tüm hakları saklıdır.
       </div>
 
     </div>
+  );
+}
+
+// --- ANA BİLEŞEN (Dışa aktarılan ve Suspense içeren) ---
+export default function LoginPage() {
+  return (
+    // Fallback olarak basit bir loading ekranı (veya sadece boş bir div) koyuyoruz
+    <Suspense fallback={
+        <div className="min-h-screen w-full bg-[#F8F9FC] flex items-center justify-center p-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

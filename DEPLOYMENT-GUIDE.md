@@ -103,17 +103,58 @@ sudo apt update && sudo apt upgrade -y
 sudo apt install -y curl wget git unzip software-properties-common
 ```
 
-### 3.2 Node.js 18+ Kurulum
+### 3.2 Node.js 20.9+ Kurulum
 ```bash
-# NodeSource repository ekle
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+# Mevcut Node.js'i kaldır (eğer varsa)
+sudo apt-get remove -y nodejs npm
 
-# Node.js kur
+# NodeSource repository ekle (Node.js 20.x)
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+
+# Node.js 20.9.0+ yükle
 sudo apt-get install -y nodejs
 
+# Eğer eski versiyon yüklendi ise, spesifik versiyon yükle
+node_version=$(node --version | cut -d'v' -f2)
+if [[ "$node_version" < "20.9.0" ]]; then
+  echo "Eski Node.js versiyonu tespit edildi. En son LTS versiyonu yükleniyor..."
+  # Latest LTS yükle
+  curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+  sudo apt-get install -y nodejs
+fi
+
 # Versiyon kontrolü
-node --version  # v18.x.x olmalı
-npm --version   # 9.x.x olmalı
+node --version  # v20.9.0+ olmalı
+npm --version   # 10.x.x olmalı
+
+# Next.js uyumluluğunu basit kontrol
+node -e "
+const current = process.version;
+const major = parseInt(current.split('.')[0].slice(1));
+const minor = parseInt(current.split('.')[1]);
+const patch = parseInt(current.split('.')[2]);
+const isOk = major > 20 || (major === 20 && minor >= 9);
+console.log('Node.js version:', current);
+console.log('Next.js 16+ uyumlu:', isOk ? 'YES ✅' : 'NO ❌');
+if (!isOk) {
+  console.log('⚠️  Manuel kurulum gerekli. En az v20.9.0 gerekiyor!');
+}
+"
+```
+
+**⚠️ Kritik:** Next.js 16+ mutlaka Node.js 20.9.0+ gerektirir!
+
+**🔧 Eğer Hâlâ Eski Versiyon Yüklendiyse:**
+```bash
+# Manuel LTS versiyonu yükle
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+source ~/.bashrc
+nvm install --lts
+nvm use --lts
+nvm alias default node
+
+# Versiyon doğrula
+node --version  # v20.x.x+ olmalı
 ```
 
 ### 3.3 PM2 Process Manager
@@ -137,17 +178,60 @@ sudo systemctl enable nginx
 # Status kontrolü
 sudo systemctl status nginx
 
+# Nginx aktif mi kontrol et (modern command)
+sudo ss -tlnp | grep :80
+
+# Alternatif: netstat kurmak isterseniz
+# sudo apt install -y net-tools
+# sudo netstat -tlnp | grep :80
+
 # Test et - browser'da VM'nin IP adresine git
 # "Welcome to nginx!" sayfasını görmelisin
+
+# 🔧 Eğer Nginx'e Erişemiyorsanız:
+echo "🚨 Nginx Troubleshooting:"
+echo "1. VM External IP kontrol edin:"
+curl -s ifconfig.me
+echo ""
+echo "2. UFW HTTP portunu kontrol edin:"
+sudo ufw status | grep 80
+echo ""
+echo "3. Google Cloud Firewall Rules kontrol edin (Console'dan)"
+echo "4. Nginx error log kontrol edin:"
+sudo tail -5 /var/log/nginx/error.log
+```
+
+**⚠️ Nginx Göremiyorsanız:**
+```bash
+# 1. Google Cloud Console'da VM'nin "Allow HTTP traffic" açık mı?
+# 2. UFW HTTP portunu açın:
+sudo ufw allow 80/tcp
+sudo ufw reload
+
+# 3. Nginx restart:
+sudo systemctl restart nginx
+
+# 4. Port kontrolü:
+sudo ss -tlnp | grep :80
+
+# 5. External IP'yi doğru kullanıyor musunuz?
+curl -s http://ipinfo.io/ip  # Bu sizin external IP'niz
+
+# 6. Test:
+curl -I http://EXTERNAL_IP
 ```
 
 ### 3.5 UFW Firewall (Güvenlik)
 ```bash
+# UFW kurulumu (eğer yüklü değilse)
+sudo apt install -y ufw
+
 # UFW aktif et
 sudo ufw enable
 
 # Gerekli portları aç
 sudo ufw allow ssh
+sudo ufw allow 3000/tcp  # Test için Next.js port
 sudo ufw allow 80/tcp    # HTTP
 sudo ufw allow 443/tcp   # HTTPS
 
@@ -175,7 +259,7 @@ git status
 
 ### 4.2 Environment Variables
 ```bash
-# .env dosyası oluştur
+# .env dosyası oluştur (production için)
 nano .env
 
 # Aşağıdaki içeriği ekle ve değerleri güncelle:
@@ -186,7 +270,7 @@ DATABASE_URL="postgresql://postgres.xxxx:[PASSWORD]@aws-0-eu-central-1.pooler.su
 
 # NextAuth
 NEXTAUTH_SECRET="super-secret-jwt-key-minimum-32-characters"
-NEXTAUTH_URL="https://yourdomain.com"
+NEXTAUTH_URL="https://yourdomain.com"  # ÖNEMLI: Production domain'i kullan
 
 # External APIs  
 CORTEX_API_KEY="your-minimax-api-key"
@@ -195,6 +279,24 @@ CORTEX_API_KEY="your-minimax-api-key"
 NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
 NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
 ```
+
+```bash
+# Dosyayı kaydet ve çık (nano'da):
+# Ctrl+X → Y → Enter
+
+# .env dosyasının oluştuğunu kontrol et
+ls -la | grep .env
+
+# İçeriğini kontrol et (opsiyonel)
+cat .env
+```
+
+**📝 .env.local vs .env Farkı:**
+- `.env` → Production server için (deploy edilen sunucuda)
+- `.env.local` → Local development için (git'e commit edilmez)
+- Server'da sadece `.env` kullanırız
+
+**⚠️ Not:** `.env` dosyaları hidden file olduğu için `ls -la` kullanın, sadece `ls` ile görünmeyebilir.
 
 ### 4.3 Dependencies ve Build
 ```bash
@@ -263,6 +365,32 @@ pm2 startup
 # Çıkan komutu çalıştır (sudo ile başlayan komut)
 
 pm2 save
+```
+
+### 5.1.1 🧪 Port 3000 Test (İlk Aşama)
+```bash
+# Uygulamanın çalıştığını kontrol et
+pm2 status
+pm2 logs yanki-web --lines 20
+
+# Port 3000'in açık olduğunu kontrol et
+sudo ss -tlnp | grep :3000
+
+# Browser'da test et:
+# http://VM_EXTERNAL_IP:3000
+
+# Curl ile test et:
+curl -I http://VM_EXTERNAL_IP:3000
+
+# Uygulama login sayfasına yönlendirilirse başarılı!
+```
+
+**⚠️ Port 3000 Test Tamamlandıktan Sonra:**
+```bash
+# Güvenlik için port 3000'i kapat (Nginx kurulumundan sonra)
+sudo ufw delete allow 3000/tcp
+
+# Sadece Nginx üzerinden erişim sağla (80/443 portları)
 ```
 
 ### 5.2 Nginx Reverse Proxy
@@ -377,10 +505,16 @@ pm2 logs yanki-web --lines 50
 # Nginx status
 sudo systemctl status nginx
 
-# Port kontrolü
-sudo netstat -tlnp | grep :80
-sudo netstat -tlnp | grep :443
-sudo netstat -tlnp | grep :3000
+# Port kontrolü (modern command)
+sudo ss -tlnp | grep :80
+sudo ss -tlnp | grep :443
+sudo ss -tlnp | grep :3000
+
+# Alternatif: netstat kullanmak isterseniz
+# sudo apt install -y net-tools
+# sudo netstat -tlnp | grep :80
+# sudo netstat -tlnp | grep :443
+# sudo netstat -tlnp | grep :3000
 
 # Test URLs:
 curl -I http://yourdomain.com
@@ -507,7 +641,7 @@ pm2 show yanki-web
 pm2 status
 
 # Port 3000 açık mı?
-sudo netstat -tlnp | grep :3000
+sudo ss -tlnp | grep :3000
 
 # Nginx config test
 sudo nginx -t
