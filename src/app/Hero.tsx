@@ -200,15 +200,16 @@ const Hero = () => {
     setAudioUrl(null);
 
     try {
-      console.log("🔊 TTS API çağrısı:", text.slice(0, 50) + "...", selectedEmotion, selectedLanguage);
-      const response = await axios.post('/api/tts', {
-        text: text,
+      // Custom metin için demo API kullan (voice mapping ve IP rate limiting için)
+      console.log("🔊 Demo API çağrısı:", text.slice(0, 50) + "...", selectedEmotion, selectedLanguage);
+      const response = await axios.post('/api/demo', {
         voiceId: selectedVoice.id,
         emotion: selectedEmotion,
-        language: selectedLanguage
+        language: selectedLanguage,
+        customText: text // Custom text için özel parametre
       });
 
-      console.log("API Response:", response.data);
+      console.log("Demo API Response:", response.data);
 
       if (response.data.success && response.data.output) {
         setAudioUrl(response.data.output);
@@ -218,9 +219,15 @@ const Hero = () => {
       }
 
     } catch (error: any) {
-      console.error("❌ Hata:", error);
-      const errorMsg = error.response?.data?.error || error.message || 'Bir hata oluştu';
-      alert(`Hata: ${errorMsg}`);
+      console.error("❌ Demo API Hata:", error);
+      const errorMsg = error.response?.data?.error || error.message || 'Demo ses üretimi başarısız';
+      
+      // Rate limit hatası özel mesajı
+      if (error.response?.status === 429) {
+        alert(`Demo Limiti: ${errorMsg}`);
+      } else {
+        alert(`Hata: ${errorMsg}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -242,6 +249,17 @@ const Hero = () => {
   const onAudioEnded = () => {
     setIsPlaying(false);
   };
+
+  // API'den ses gelince otomatik çal (sadece custom metin için)
+  useEffect(() => {
+    if (audioUrl && audioRef.current && !isDemoMode) {
+      audioRef.current.play().then(() => {
+        setIsPlaying(true);
+      }).catch(e => {
+        console.error("Otomatik oynatma hatası:", e);
+      });
+    }
+  }, [audioUrl, isDemoMode]);
 
   return (
     <div className="min-h-screen bg-white relative overflow-hidden text-slate-900 selection:bg-blue-100 selection:text-blue-900">

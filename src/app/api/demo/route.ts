@@ -48,7 +48,7 @@ const DEMO_VOICES = {
     pitch: 0,
     speed: 1,
     volume: 1,
-    actualVoiceId: "socialmedia_female_2_v1"
+    actualVoiceId: "English_Upbeat_Woman"
   },
   "4": {
     name: "Merve - Çocuk",
@@ -57,7 +57,7 @@ const DEMO_VOICES = {
     pitch: 0,
     speed: 1,
     volume: 1,
-    actualVoiceId: "English_Soft-spokenGirl"
+    actualVoiceId: "English_PlayfulGirl"
   }
 };
 
@@ -190,7 +190,8 @@ export async function POST(req: Request) {
     }
 
     const { voiceId, emotion } = validation.data;
-    const language = 'Turkish'; // Demo için varsayılan dil
+    const customText = body.customText; // Custom text parametresi (opsiyonel)
+    const language = body.language || 'Turkish'; // Demo için varsayılan dil
 
     // API Key kontrolü
     const apiKey = process.env.CORTEX_API_KEY;
@@ -215,11 +216,17 @@ export async function POST(req: Request) {
     // Emotion kontrolü
     const selectedEmotion = emotion && EMOTION_OPTIONS.includes(emotion) ? emotion : demoVoice.defaultEmotion;
 
+    // Text seçimi - custom text varsa onu kullan, yoksa demo text
+    const finalText = customText && customText.trim().length > 0 && customText.length <= 100 
+      ? customText 
+      : demoVoice.text;
+
     Logger.info('Demo isteği işleniyor', {
       requestId,
       clientIP,
       voiceName: demoVoice.name,
-      textPreview: demoVoice.text.slice(0, 30),
+      textPreview: finalText.slice(0, 30),
+      customText: !!customText,
       selectedEmotion,
       language,
       remaining
@@ -236,7 +243,7 @@ export async function POST(req: Request) {
       {
         version: "minimax/speech-2.6-hd",
         input: {
-          text: demoVoice.text,
+          text: finalText,
           pitch: demoVoice.pitch,
           speed: demoVoice.speed,
           volume: demoVoice.volume,
@@ -270,7 +277,7 @@ export async function POST(req: Request) {
           data: responseData,
           output: audioUrl,
           voiceName: demoVoice.name,
-          text: demoVoice.text,
+          text: finalText,
           emotion: selectedEmotion,
           language: languageBoost,
           remaining: remaining
@@ -294,7 +301,7 @@ export async function POST(req: Request) {
         data: finalResult,
         output: finalUrl,
         voiceName: demoVoice.name,
-        text: demoVoice.text,
+        text: finalText,
         emotion: selectedEmotion,
         language: languageBoost,
         remaining: remaining
@@ -308,7 +315,7 @@ export async function POST(req: Request) {
          data: responseData,
          output: typeof responseData.output === 'string' ? responseData.output : responseData.output.audio_url,
          voiceName: demoVoice.name,
-         text: demoVoice.text,
+         text: finalText,
          emotion: selectedEmotion,
          language: languageBoost,
          remaining: remaining

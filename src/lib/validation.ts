@@ -72,10 +72,14 @@ export interface TTSRequest {
   model?: TTSModel;
 }
 
+// Demo Voice IDs (Frontend uses simple IDs)
+export const DEMO_VOICE_IDS = ["1", "2", "3", "4"] as const;
+export type DemoVoiceId = typeof DEMO_VOICE_IDS[number];
+
 // Demo Request Interface
 export interface DemoRequest {
   text: string;
-  voiceId: VoiceId;
+  voiceId: DemoVoiceId;
   emotion?: Emotion;
 }
 
@@ -192,27 +196,22 @@ export function validateDemoRequest(data: any): { success: true; data: DemoReque
     return { success: false, error: 'Geçersiz istek formatı.' };
   }
 
-  // Text validation
-  if (!data.text || typeof data.text !== 'string') {
-    return { success: false, error: 'Metin boş olamaz.', field: 'text' };
-  }
-  
-  const text = data.text.trim();
-  if (text.length === 0) {
-    return { success: false, error: 'Metin sadece boşluk karakterlerinden oluşamaz.', field: 'text' };
-  }
-  
-  if (text.length > 200) {
-    return { success: false, error: 'Demo için metin 200 karakterden uzun olamaz.', field: 'text' };
-  }
-
-  // Voice ID validation
+  // Voice ID validation (Demo uses simple IDs: "1", "2", "3", "4")
   if (!data.voiceId || typeof data.voiceId !== 'string') {
     return { success: false, error: 'Ses ID boş olamaz.', field: 'voiceId' };
   }
   
-  if (!VALID_VOICE_IDS.includes(data.voiceId as VoiceId)) {
-    return { success: false, error: 'Geçersiz ses ID.', field: 'voiceId' };
+  if (!DEMO_VOICE_IDS.includes(data.voiceId as DemoVoiceId)) {
+    return { success: false, error: `Geçersiz demo voice ID. Geçerli: ${DEMO_VOICE_IDS.join(', ')}`, field: 'voiceId' };
+  }
+
+  // Text validation (opsiyonel - demo voice'ların kendi text'leri var)
+  let text = '';
+  if (data.text && typeof data.text === 'string') {
+    text = data.text.trim();
+    if (text.length > 200) {
+      return { success: false, error: 'Demo için metin 200 karakterden uzun olamaz.', field: 'text' };
+    }
   }
 
   // Emotion validation (optional)
@@ -225,7 +224,7 @@ export function validateDemoRequest(data: any): { success: true; data: DemoReque
     success: true,
     data: {
       text,
-      voiceId: data.voiceId as VoiceId,
+      voiceId: data.voiceId as DemoVoiceId,
       emotion: emotion as Emotion
     }
   };

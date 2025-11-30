@@ -6,6 +6,7 @@ import bcrypt from 'bcryptjs';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma) as any,
+  trustHost: true, // <--- KANKA BU SATIRI EKLEMEN LAZIM, EKSİK OLAN BU!
   providers: [
     CredentialsProvider({
       name: 'credentials',
