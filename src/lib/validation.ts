@@ -54,7 +54,8 @@ export const VALID_VOICE_CLONING_MODELS = [
 ] as const;
 
 // Type definitions
-export type VoiceId = typeof VALID_VOICE_IDS[number];
+// DÜZELTME: Klonlanmış sesler için string tipini de kabul ediyoruz
+export type VoiceId = typeof VALID_VOICE_IDS[number] | string;
 export type Emotion = typeof VALID_EMOTIONS[number];
 export type Language = typeof VALID_LANGUAGES[number];
 export type TTSModel = typeof VALID_TTS_MODELS[number];
@@ -136,8 +137,12 @@ export function validateTTSRequest(data: any): { success: true; data: TTSRequest
     return { success: false, error: 'Ses ID boş olamaz.', field: 'voiceId' };
   }
   
-  if (!VALID_VOICE_IDS.includes(data.voiceId as VoiceId)) {
-    return { success: false, error: `Geçersiz ses ID. Geçerli sesler: ${VALID_VOICE_IDS.join(', ')}`, field: 'voiceId' };
+  // DÜZELTME: Statik listede VARSA -VEYA- ID "R8_" ile başlıyorsa (veya yeterince uzunsa) geçerli say
+  const isStaticVoice = VALID_VOICE_IDS.includes(data.voiceId as any);
+  const isClonedVoice = data.voiceId.startsWith('R8_') || data.voiceId.length > 2;
+
+  if (!isStaticVoice && !isClonedVoice) {
+    return { success: false, error: `Geçersiz ses ID.`, field: 'voiceId' };
   }
 
   // Emotion validation (optional)
@@ -328,12 +333,16 @@ export function validateFavoriteRequest(data: any): { success: true; data: Favor
     return { success: false, error: 'Geçersiz istek formatı.' };
   }
 
-  // Voice ID validation
+  // Voice ID validation - DÜZELTME: Klon sesler için esneklik
   if (!data.voiceId || typeof data.voiceId !== 'string') {
     return { success: false, error: 'Ses ID boş olamaz.', field: 'voiceId' };
   }
   
-  if (!VALID_VOICE_IDS.includes(data.voiceId as VoiceId)) {
+  // Burada da klon seslere izin verelim
+  const isStaticVoice = VALID_VOICE_IDS.includes(data.voiceId as any);
+  const isClonedVoice = data.voiceId.startsWith('R8_') || data.voiceId.length > 2;
+
+  if (!isStaticVoice && !isClonedVoice) {
     return { success: false, error: 'Geçersiz ses ID.', field: 'voiceId' };
   }
 

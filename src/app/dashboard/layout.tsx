@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSession, signOut } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
   Search,
@@ -22,7 +22,10 @@ import {
   Menu,
   X,
   FileText,
-  User
+  User,
+  BarChart2,
+  MessageSquare,
+  History // ✅ Eklendi: Eksik olan import
 } from 'lucide-react';
 
 interface UserData {
@@ -43,6 +46,7 @@ export default function DashboardLayout({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { data: session, status } = useSession();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -73,18 +77,13 @@ export default function DashboardLayout({
   // Plan bazında kredi limitleri
   const getPlanLimits = (plan?: string) => {
     switch(plan) {
-      case 'starter':
-        return { credits: 50000, name: 'Başlangıç' };
-      case 'popular':
-        return { credits: 200000, name: 'Popüler' };
-      case 'enterprise':
-        return { credits: 500000, name: 'Kurumsal' };
-      default:
-        return { credits: 500, name: 'Ücretsiz' };
+      case 'starter': return { credits: 50000, name: 'Başlangıç' };
+      case 'popular': return { credits: 200000, name: 'Popüler' };
+      case 'enterprise': return { credits: 500000, name: 'Kurumsal' };
+      default: return { credits: 500, name: 'Ücretsiz' };
     }
   };
 
-  // Kredi hesaplamaları
   const planLimits = getPlanLimits(userData?.plan);
   const maxCredits = planLimits.credits;
   const currentCredits = userData?.credits ?? (session?.user as any)?.credits ?? 500;
@@ -94,39 +93,29 @@ export default function DashboardLayout({
     await signOut({ callbackUrl: '/' });
   };
 
-  // Mobil menü kapama event listener'ı
   useEffect(() => {
-    const handleCloseMobileMenu = () => {
-      setMobileMenuOpen(false);
-    };
-
+    const handleCloseMobileMenu = () => setMobileMenuOpen(false);
     window.addEventListener('closeMobileMenu', handleCloseMobileMenu);
-    return () => {
-      window.removeEventListener('closeMobileMenu', handleCloseMobileMenu);
-    };
+    return () => window.removeEventListener('closeMobileMenu', handleCloseMobileMenu);
   }, []);
 
   if (status === 'loading') {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-pulse text-lg text-slate-600">Yükleniyor...</div>
-        </div>
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="animate-pulse text-lg text-white/50">Yükleniyor...</div>
       </div>
     );
   }
 
-  if (!session) {
-    return null;
-  }
+  if (!session) return null;
 
   return (
-    <div className="flex min-h-screen bg-[#F9FAFB] text-slate-800 font-sans">
+    <div className="flex min-h-screen bg-[#F8F9FC] font-sans text-slate-800">
       {/* Mobile Menu Button */}
       <div className="md:hidden fixed top-4 right-4 z-50">
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="p-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50"
+          className="p-2 bg-black border border-white/10 rounded-lg shadow-sm text-white"
         >
           {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
@@ -135,127 +124,94 @@ export default function DashboardLayout({
       {/* Mobile Overlay */}
       {mobileMenuOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          className="md:hidden fixed inset-0 z-30 bg-black/60 backdrop-blur-sm"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
 
-      {/* ---------------- SIDEBAR ---------------- */}
-      <aside className={`w-64 bg-white border-r border-gray-200 flex flex-col justify-between h-screen overflow-y-auto transition-all duration-300 z-40 ${
+      {/* ---------------- DARK SIDEBAR ---------------- */}
+      <aside className={`w-72 bg-[#0F0F0F] text-white flex flex-col justify-between h-screen overflow-y-auto transition-transform duration-300 z-40 border-r border-white/5 ${
         mobileMenuOpen
-          ? 'fixed left-0 top-0 md:sticky md:top-0'
-          : 'fixed -left-64 top-0 md:sticky md:top-0 md:left-0'
+          ? 'fixed left-0 top-0 translate-x-0'
+          : 'fixed left-0 top-0 -translate-x-full md:translate-x-0 md:sticky'
       }`}>
         <div className="p-6">
           {/* Logo */}
-          <div className="flex items-center gap-2 mb-8">
-            <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
-              <div className="w-4 h-2 border-b-2 border-white rounded-full"></div>
+          <div className="flex items-center gap-3 mb-10 pl-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+               <div className="flex gap-0.5 items-end h-4">
+                  <div className="w-1 h-2 bg-white rounded-full animate-pulse"></div>
+                  <div className="w-1 h-4 bg-white rounded-full animate-pulse delay-75"></div>
+                  <div className="w-1 h-3 bg-white rounded-full animate-pulse delay-150"></div>
+               </div>
             </div>
-            <span className="text-xl font-bold tracking-tight">Yankı</span>
+            <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">Yankı.ai</span>
           </div>
 
-          {/* Workspace Dropdown */}
-          <div className="mb-6">
-            <button className="w-full flex items-center justify-between px-3 py-2 bg-gray-100 rounded-lg text-sm font-medium hover:bg-gray-200 transition">
-              <span className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-purple-500 rounded sm:rounded-sm"></div>
-                Ana Çalışma Alanı
-              </span>
-              <ChevronDown className="w-4 h-4 text-gray-500" />
-            </button>
-          </div>
+          {/* Navigation */}
+          <div className="space-y-8">
+            <div>
+              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-4 px-4">Platform</p>
+              <div className="space-y-1">
+                <NavItem icon={<LayoutDashboard />} label="Panel" href="/dashboard" active={pathname === '/dashboard'} />
+                <NavItem icon={<Mic />} label="Stüdyo" href="/dashboard/studio" active={pathname === '/dashboard/studio'} />
+                <NavItem icon={<Compass />} label="Sesler" href="/dashboard/voices" active={pathname === '/dashboard/voices'} />
+                <NavItem icon={<Wand2 />} label="Klonlama" href="/dashboard/cloning" active={pathname === '/dashboard/cloning'} />
+              </div>
+            </div>
 
-          {/* Search */}
-          <div className="relative mb-6">
-            <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Arama yapın..."
-              className="w-full pl-9 pr-4 py-2 bg-transparent border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500"
-            />
-            <span className="absolute right-3 top-2.5 text-xs text-gray-400 border border-gray-200 rounded px-1">
-              ⌘ F
-            </span>
-          </div>
+            <div>
+              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-4 px-4">Araçlar</p>
+              <div className="space-y-1">
+                <NavItem icon={<FileText />} label="Deşifre" href="/dashboard/transcribe" active={pathname === '/dashboard/transcribe'} />
+                <NavItem icon={<History />} label="Geçmiş" href="/dashboard/history" active={pathname === '/dashboard/history'} />
+                <NavItem icon={<BarChart2 />} label="Raporlar" href="/dashboard/reports" />
+              </div>
+            </div>
 
-          {/* Main Menu */}
-          <div className="space-y-1 mb-8">
-            <p className="text-xs font-semibold text-gray-400 mb-2 px-3">ANA MENÜ</p>
-            <NavItem icon={<LayoutDashboard />} label="Panel" href="/dashboard" active />
-            <NavItem icon={<Compass />} label="Ses Kütüphanesi" href="/dashboard/voices" />
-            <NavItem icon={<Mic />} label="Stüdyo" href="/dashboard/studio" />
-            <NavItem icon={<Wand2 />} label="Ses Klonlama" href="/dashboard/cloning" />
-            <NavItem icon={<Sparkles />} label="Geçmiş Sesler" href="/dashboard/history" />
-          </div>
-
-          {/* Advanced Menu */}
-          <div className="space-y-1 mb-8">
-            <p className="text-xs font-semibold text-gray-400 mb-2 px-3">GELİŞMİŞ</p>
-            <NavItem icon={<FileText />} label="Deşifre" href="/dashboard/transcribe" />
-          </div>
-
-           {/* Others Menu */}
-           <div className="space-y-1">
-            <p className="text-xs font-semibold text-gray-400 mb-2 px-3">HESAP</p>
-            <NavItem icon={<User />} label="Profil Bilgileri" href="/dashboard/profile" />
-            <NavItem icon={<HelpCircle />} label="Yardım ve Destek" />
+            <div>
+              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-4 px-4">Ayarlar</p>
+              <div className="space-y-1">
+                <NavItem icon={<User />} label="Hesap" href="/dashboard/profile" active={pathname === '/dashboard/profile'} />
+                <NavItem icon={<Settings />} label="Ayarlar" href="/dashboard/settings" />
+                <NavItem icon={<HelpCircle />} label="Destek" href="/dashboard/support" />
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Bottom Sidebar */}
-        <div className="p-4 border-t border-gray-100">
-          {/* Credits Card */}
-          <div className="bg-white border border-gray-200 rounded-xl p-4 mb-4 shadow-sm">
-             <div className="flex justify-between items-end mb-2">
-                <span className="text-sm font-bold">
-                  {currentCredits} / {maxCredits}
-                </span>
-                <span className="text-xs text-gray-500">
-                  {userData?.plan || session.user?.plan || 'Ücretsiz'}
-                </span>
-           </div>
-           <p className="text-xs text-gray-500 mb-3">
-             {planLimits.name} plan - {maxCredits >= 50000 ? `${(maxCredits/1000).toLocaleString('tr-TR')}K kredi/ay` : `günlük ${maxCredits} karakter`}
-           </p>
-           <div className="w-full bg-gray-100 h-2 rounded-full mb-3 overflow-hidden">
-              <div
-                className="bg-cyan-400 h-full rounded-full transition-all duration-300"
-                style={{ width: `${usagePercentage}%` }}
-              ></div>
-           </div>
-             <button className="w-full py-1.5 border border-gray-200 rounded-lg text-xs font-semibold hover:bg-gray-50">
-                Yükselt
-             </button>
-          </div>
-
-          {/* Profile */}
-          <div className="flex items-center gap-3 px-1 hover:bg-gray-50 p-2 rounded-lg cursor-pointer">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm">
-              {userData?.name?.charAt(0) || session.user?.name?.charAt(0) || session.user?.email?.charAt(0) || 'U'}
-            </div>
-            <div className="flex-1 overflow-hidden">
-                <p className="text-sm font-semibold truncate">
+        {/* Bottom Sidebar - User Profile */}
+        <div className="p-4 m-4 bg-white/5 rounded-2xl border border-white/5">
+           <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center text-white font-bold text-sm shadow-inner">
+                {userData?.name?.charAt(0) || session.user?.name?.charAt(0) || 'U'}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white truncate">
                   {userData?.name || session.user?.name || 'Kullanıcı'}
                 </p>
-                <p className="text-xs text-gray-500 truncate">
-                  {session.user?.email || 'user@example.com'}
+                <p className="text-xs text-gray-400 truncate">
+                  {currentCredits.toLocaleString()} kredi
                 </p>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="p-1 text-gray-400 hover:text-red-600 transition-colors"
-              title="Çıkış Yap"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
+              </div>
+           </div>
+           
+           <button 
+             onClick={handleLogout}
+             className="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+           >
+             <LogOut className="w-3.5 h-3.5" />
+             Çıkış Yap
+           </button>
         </div>
       </aside>
 
       {/* ---------------- MAIN CONTENT ---------------- */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden">
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 pb-32 pt-16 md:pt-8">
+      <main className="flex-1 flex flex-col min-h-screen relative overflow-hidden">
+        {/* Top Header Background Decoration */}
+        <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-[#F0F2F5] to-transparent -z-10"></div>
+        
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-12 pb-32 pt-20 md:pt-12">
           {children}
         </div>
       </main>
@@ -263,8 +219,7 @@ export default function DashboardLayout({
   );
 }
 
-// ---------------- HELPER COMPONENTS ----------------
-
+// Helper Component for Nav Items
 function NavItem({ icon, label, active = false, href = '#', disabled = false }: {
   icon: React.ReactNode,
   label: string,
@@ -272,29 +227,36 @@ function NavItem({ icon, label, active = false, href = '#', disabled = false }: 
   href?: string,
   disabled?: boolean
 }) {
-    if (disabled) {
-        return (
-            <div className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-300 cursor-not-allowed">
-                <span className="w-4 h-4">{icon}</span>
-                {label}
-            </div>
-        )
-    }
+  const baseClasses = "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative";
+  const activeClasses = active 
+    ? "bg-white text-black shadow-lg shadow-white/5" 
+    : "text-gray-400 hover:text-white hover:bg-white/5";
 
+  if (disabled) {
     return (
-        <Link
-            href={href}
-            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${active ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
-            onClick={() => {
-                // Mobil menüyü kapat (eğer parent component'te setMobileMenuOpen varsa)
-                if (window.innerWidth < 768) {
-                    const event = new CustomEvent('closeMobileMenu');
-                    window.dispatchEvent(event);
-                }
-            }}
-        >
-            <span className="w-4 h-4">{icon}</span>
-            {label}
-        </Link>
-    )
+      <div className={`${baseClasses} text-gray-600 cursor-not-allowed`}>
+        <span className="w-5 h-5 opacity-50">{icon}</span>
+        {label}
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      href={href}
+      className={`${baseClasses} ${activeClasses}`}
+      onClick={() => {
+        if (window.innerWidth < 768) {
+          const event = new CustomEvent('closeMobileMenu');
+          window.dispatchEvent(event);
+        }
+      }}
+    >
+      {/* Active Indicator Line */}
+      {active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-indigo-500 rounded-r-full"></div>}
+      
+      <span className={`w-5 h-5 ${active ? 'text-indigo-600' : 'group-hover:text-white'}`}>{icon}</span>
+      {label}
+    </Link>
+  );
 }

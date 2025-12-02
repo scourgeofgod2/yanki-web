@@ -99,7 +99,7 @@ model ClonedVoice {
   voiceId          String   @map("voice_id") // Minimax API'den dönen voice ID
   name             String
   description      String?
-  accuracy         String   @default("high") // high, medium, low
+  accuracy         Float    @default(0.7) // 0.1-0.9 arası accuracy değeri
   originalFileName String   @map("original_file_name")
   fileSize         Int      @map("file_size")
   status           String   @default("processing") // processing, completed, failed
