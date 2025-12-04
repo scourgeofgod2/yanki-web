@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from './providers';
 
-// Fontu yapılandırıyoruz (Google Fonts'tan çekiyor)
-const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"] });
+// INTER fontu yapılandırıyoruz (modern typography için)
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Yankı | Yapay Zeka Ses Stüdyosu",
@@ -18,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="tr">
-      <body className={jakarta.className}>
+      <body className={inter.className}>
         <Providers>
           {children}
         </Providers>

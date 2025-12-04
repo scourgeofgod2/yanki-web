@@ -1,11 +1,100 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Check, X, Star, Zap, Crown, Users } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { Check, X, Star, Zap, Crown, Users, Clock, TrendingUp, AlertCircle } from 'lucide-react';
+
+// Navigation için authentication butonları
+function AuthButtons() {
+  const { data: session, status } = useSession();
+
+  if (status === 'loading') {
+    return (
+      <div className="flex items-center gap-4">
+        <div className="w-20 h-8 bg-slate-200 animate-pulse rounded"></div>
+        <div className="w-16 h-8 bg-slate-200 animate-pulse rounded"></div>
+      </div>
+    );
+  }
+
+  if (session) {
+    return (
+      <div className="flex items-center gap-4">
+        <Link href="/" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition">
+          Ana Sayfa
+        </Link>
+        <Link href="/dashboard" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition">
+          Panel
+        </Link>
+        <Link href="/api/auth/signout" className="bg-slate-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-slate-800 transition">
+          Çıkış
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-4">
+      <Link href="/" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition">
+        Ana Sayfa
+      </Link>
+      <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition">
+        Giriş Yap
+      </Link>
+      <Link href="/register" className="bg-slate-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-slate-800 transition">
+        Kayıt Ol
+      </Link>
+    </div>
+  );
+}
+
+// Countdown Timer Component
+function CountdownTimer({ targetDate }: { targetDate: Date }) {
+  const [timeLeft, setTimeLeft] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0
+  });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = targetDate.getTime() - now;
+
+      if (distance > 0) {
+        setTimeLeft({
+          days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+          seconds: Math.floor((distance % (1000 * 60)) / 1000)
+        });
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  return (
+    <div className="flex items-center gap-2 text-sm">
+      <Clock size={16} className="text-red-500" />
+      <span className="font-mono bg-red-50 text-red-700 px-2 py-1 rounded">
+        {timeLeft.days}g {timeLeft.hours}s {timeLeft.minutes}d {timeLeft.seconds}s
+      </span>
+    </div>
+  );
+}
 
 const PricingPage = () => {
+  const { data: session, status } = useSession();
   const [isYearly, setIsYearly] = useState(false);
+  
+  // Ayın sonuna kadar countdown
+  const monthEndDate = new Date();
+  monthEndDate.setMonth(monthEndDate.getMonth() + 1);
+  monthEndDate.setDate(0);
+  monthEndDate.setHours(23, 59, 59, 999);
 
   const plans = [
     {
@@ -137,47 +226,54 @@ const PricingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white font-['Inter',ui-sans-serif,system-ui,-apple-system,sans-serif]">
       {/* NAVBAR */}
       <nav className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between border-b border-slate-100">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M12 2v20"/><path d="M4.93 10.93a10 10 0 0 1 14.14 0"/></svg>
           </div>
-          <span className="text-2xl font-bold tracking-tight text-slate-900">Yankı</span>
+          <span className="text-2xl font-bold tracking-tight text-slate-900 font-['Inter']">Yankı</span>
         </Link>
 
-        <div className="flex items-center gap-4">
-          <Link href="/" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition">
-            Ana Sayfa
-          </Link>
-          <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition">
-            Giriş Yap
-          </Link>
-          <Link href="/register" className="bg-slate-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-slate-800 transition">
-            Kayıt Ol
-          </Link>
-        </div>
+        <AuthButtons />
       </nav>
 
       {/* HERO SECTION */}
       <section className="py-20 text-center">
         <div className="max-w-4xl mx-auto px-6">
-          <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-full px-4 py-1.5 mb-6">
-            <Star size={14} className="text-blue-600" />
-            <span className="text-xs font-bold text-blue-700 tracking-wide uppercase">
-              500 Karakter Hediye ile Başlayın
+          {/* Urgency Badge */}
+          <div className="inline-flex items-center gap-2 bg-red-50 border border-red-200 rounded-full px-4 py-1.5 mb-4 animate-pulse">
+            <AlertCircle size={14} className="text-red-600" />
+            <span className="text-xs font-bold text-red-700 tracking-wide uppercase font-['Inter']">
+              🔥 Bu Ay Sonuna Kadar %50 İNDİRİM
             </span>
           </div>
           
-          <h1 className="text-5xl lg:text-6xl font-bold text-slate-900 leading-tight mb-6">
+          {/* Countdown Timer */}
+          <div className="flex justify-center mb-6">
+            <div className="bg-white border border-slate-200 rounded-lg px-4 py-2 shadow-sm">
+              <div className="text-xs text-slate-600 mb-1 font-['Inter']">İndirim bitiyor:</div>
+              <CountdownTimer targetDate={monthEndDate} />
+            </div>
+          </div>
+          
+          {/* Social Proof */}
+          <div className="inline-flex items-center gap-2 bg-green-50 border border-green-100 rounded-full px-4 py-1.5 mb-6">
+            <TrendingUp size={14} className="text-green-600" />
+            <span className="text-xs font-medium text-green-700 font-['Inter']">
+              Son 24 saatte 127 kişi üye oldu • Sadece bu ayın son 23 üyeliği kaldı!
+            </span>
+          </div>
+          
+          <h1 className="text-6xl lg:text-7xl font-bold text-slate-900 leading-tight mb-6 font-['Inter']">
             Size Uygun <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
               Paketi Seçin
             </span>
           </h1>
           
-          <p className="text-xl text-slate-500 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-slate-500 mb-8 max-w-2xl mx-auto font-['Inter']">
             20+ dilde profesyonel seslendirme, ses klonlama ve gelişmiş özelliklerle içeriklerinizi bir üst seviyeye taşıyın.
           </p>
 
@@ -199,11 +295,11 @@ const PricingPage = () => {
               />
             </button>
             <div className="flex items-center gap-2">
-              <span className={`text-sm font-medium ${isYearly ? 'text-slate-900' : 'text-slate-500'}`}>
+              <span className={`text-sm font-medium font-['Inter'] ${isYearly ? 'text-slate-900' : 'text-slate-500'}`}>
                 Yıllık
               </span>
-              <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">
-                35% İndirim
+              <span className="bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded font-['Inter'] animate-bounce">
+                %50 İNDİRİM + 35% EKSTRA!
               </span>
             </div>
           </div>
@@ -214,12 +310,16 @@ const PricingPage = () => {
       <section className="pb-10">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">
+            <h2 className="text-3xl font-bold text-slate-900 mb-4 font-['Inter']">
               💳 Kredi Paketleri
             </h2>
-            <p className="text-slate-600">
+            <p className="text-slate-600 font-['Inter']">
               İhtiyacınıza göre kredi satın alın, istediğiniz zaman kullanın
             </p>
+            <div className="mt-4 inline-flex items-center gap-2 bg-orange-50 text-orange-700 px-3 py-1 rounded-full text-sm font-['Inter']">
+              <span>⚡</span>
+              <span>Bu hafta 234 paket satıldı!</span>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-16">
@@ -258,11 +358,27 @@ const PricingPage = () => {
                     ~₺{(pkg.price / (pkg.credits / 1000)).toFixed(2)} / 1K kredi
                   </div>
                   
-                  <button className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-colors hover:opacity-90 ${
-                    pkg.popular ? 'bg-purple-600' : 'bg-blue-600'
-                  }`}>
-                    Satın Al
-                  </button>
+                  {status === 'loading' ? (
+                    <div className="w-full py-3 px-4 rounded-xl bg-slate-200 animate-pulse">
+                      <span className="text-transparent">Yükleniyor...</span>
+                    </div>
+                  ) : session ? (
+                    <Link href="/dashboard">
+                      <button className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-colors hover:opacity-90 ${
+                        pkg.popular ? 'bg-purple-600' : 'bg-blue-600'
+                      }`}>
+                        Panele Git
+                      </button>
+                    </Link>
+                  ) : (
+                    <Link href="/register">
+                      <button className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-colors hover:opacity-90 ${
+                        pkg.popular ? 'bg-purple-600' : 'bg-blue-600'
+                      }`}>
+                        Satın Al
+                      </button>
+                    </Link>
+                  )}
                 </div>
               </div>
             ))}
@@ -295,12 +411,24 @@ const PricingPage = () => {
       <section className="pb-20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">
+            <h2 className="text-3xl font-bold text-slate-900 mb-4 font-['Inter']">
               📊 Aylık Abonelik Planları
             </h2>
-            <p className="text-slate-600">
+            <p className="text-slate-600 font-['Inter']">
               Düzenli kullanım için en uygun fiyatlı seçenekler
             </p>
+            <div className="mt-4 space-y-2">
+              <div className="inline-flex items-center gap-2 bg-red-50 text-red-700 px-3 py-1 rounded-full text-sm font-['Inter']">
+                <span>🔥</span>
+                <span>Bu ay sonuna kadar %50 indirim!</span>
+              </div>
+              <div className="block">
+                <span className="inline-flex items-center gap-2 bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-sm font-['Inter']">
+                  <span>👥</span>
+                  <span>Bu ayın son 23 üyeliği • Kaçırma!</span>
+                </span>
+              </div>
+            </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {plans.map((plan) => (
@@ -357,9 +485,23 @@ const PricingPage = () => {
                     )}
                   </div>
 
-                  <button className={`w-full py-3 px-6 rounded-xl font-semibold text-white transition-colors ${getColorClasses(plan.color, 'button')}`}>
-                    {plan.cta}
-                  </button>
+                  {status === 'loading' ? (
+                    <div className="w-full py-3 px-6 rounded-xl bg-slate-200 animate-pulse">
+                      <span className="text-transparent">Yükleniyor...</span>
+                    </div>
+                  ) : session ? (
+                    <Link href="/dashboard">
+                      <button className={`w-full py-3 px-6 rounded-xl font-semibold text-white transition-colors ${getColorClasses(plan.color, 'button')}`}>
+                        Panele Git
+                      </button>
+                    </Link>
+                  ) : (
+                    <Link href="/register">
+                      <button className={`w-full py-3 px-6 rounded-xl font-semibold text-white transition-colors ${getColorClasses(plan.color, 'button')}`}>
+                        {plan.cta}
+                      </button>
+                    </Link>
+                  )}
                 </div>
 
                 {/* FEATURES */}
@@ -450,16 +592,42 @@ const PricingPage = () => {
             500 karakter hediye ile Yankı'yı deneyin, profesyonel seslendirmenin gücünü keşfedin.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/register">
-              <button className="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold hover:bg-slate-50 transition">
-                Ücretsiz Başla
-              </button>
-            </Link>
-            <Link href="/dashboard">
-              <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold hover:bg-white hover:text-blue-600 transition">
-                Demo İzle
-              </button>
-            </Link>
+            {status === 'loading' ? (
+              <>
+                <div className="bg-white/20 animate-pulse px-8 py-4 rounded-xl">
+                  <span className="text-transparent">Yükleniyor...</span>
+                </div>
+                <div className="border-2 border-white/20 animate-pulse px-8 py-4 rounded-xl">
+                  <span className="text-transparent">Yükleniyor...</span>
+                </div>
+              </>
+            ) : session ? (
+              <>
+                <Link href="/dashboard">
+                  <button className="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold hover:bg-slate-50 transition">
+                    Panele Git
+                  </button>
+                </Link>
+                <Link href="/dashboard/studio">
+                  <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold hover:bg-white hover:text-blue-600 transition">
+                    Stüdyo
+                  </button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/register">
+                  <button className="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold hover:bg-slate-50 transition">
+                    Ücretsiz Başla
+                  </button>
+                </Link>
+                <Link href="/dashboard">
+                  <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold hover:bg-white hover:text-blue-600 transition">
+                    Demo İzle
+                  </button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </section>

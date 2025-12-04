@@ -64,7 +64,10 @@ export default function StudioPage() {
   const [activeMobileView, setActiveMobileView] = useState<ViewState | null>(null);
   const [desktopView, setDesktopView] = useState<ViewState>('settings');
   const [voiceSearch, setVoiceSearch] = useState('');
+  
+  // Dropdown States
   const [isEmotionDropdownOpen, setIsEmotionDropdownOpen] = useState(false);
+  const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
 
   const [studioParams, setStudioParams] = useState<StudioParams>({
     text: 'Merhaba, ben Yankı AI ses asistanınızım. Bu gelişmiş stüdyo ile profesyonel kalitede sesler üretebilirsiniz.',
@@ -87,6 +90,18 @@ export default function StudioPage() {
     { value: 'fearful', label: 'Korkulu', icon: '😨' },
     { value: 'disgusted', label: 'Tiksinmiş', icon: '🤢' },
     { value: 'surprised', label: 'Şaşkın', icon: '😮' },
+  ];
+
+  const languages = [
+    { value: 'Turkish', label: 'Türkçe', flag: '🇹🇷' },
+    { value: 'English', label: 'İngilizce', flag: '🇬🇧' },
+    { value: 'German', label: 'Almanca', flag: '🇩🇪' },
+    { value: 'French', label: 'Fransızca', flag: '🇫🇷' },
+    { value: 'Spanish', label: 'İspanyolca', flag: '🇪🇸' },
+    { value: 'Italian', label: 'İtalyanca', flag: '🇮🇹' },
+    { value: 'Portuguese', label: 'Portekizce', flag: '🇵🇹' },
+    { value: 'Russian', label: 'Rusça', flag: '🇷🇺' },
+    { value: 'Japanese', label: 'Japonca', flag: '🇯🇵' },
   ];
 
   // Fetch Data
@@ -285,6 +300,41 @@ export default function StudioPage() {
 
   const SettingsContent = () => (
     <div className="space-y-8">
+        
+        {/* --- Language Selector (Added Here) --- */}
+        <div className="space-y-3">
+            <label className="text-sm font-medium text-gray-700">Dil</label>
+            <div className="relative">
+                <button
+                    onClick={() => {
+                        setIsLanguageDropdownOpen(!isLanguageDropdownOpen);
+                        setIsEmotionDropdownOpen(false); // Close other dropdown
+                    }}
+                    className="w-full bg-white border border-gray-200 rounded-xl p-3 flex items-center justify-between hover:border-gray-300 transition-all text-left"
+                >
+                    <span className="flex items-center gap-2">
+                        <span className="text-lg">{languages.find(l => l.value === studioParams.language)?.flag || '🌐'}</span>
+                        <span className="text-sm font-medium text-gray-900">{languages.find(l => l.value === studioParams.language)?.label || studioParams.language}</span>
+                    </span>
+                    <ChevronRight className={`w-4 h-4 text-gray-400 transition-transform ${isLanguageDropdownOpen ? 'rotate-90' : ''}`} />
+                </button>
+                {isLanguageDropdownOpen && (
+                    <div className="absolute top-full mt-1 left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto">
+                        {languages.map(l => (
+                            <button
+                                key={l.value}
+                                onClick={() => { updateParam('language', l.value); setIsLanguageDropdownOpen(false); }}
+                                className={`w-full flex items-center gap-3 p-3 text-left hover:bg-gray-50 transition-colors ${studioParams.language === l.value ? 'bg-gray-50 font-medium' : ''}`}
+                            >
+                                <span className="text-lg">{l.flag}</span>
+                                <span className="text-sm text-gray-700">{l.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+
         <div className="space-y-2">
             <label className="text-xs font-bold text-gray-400 uppercase tracking-wide px-1">Model</label>
             <div className="grid grid-cols-2 gap-2">
@@ -320,7 +370,10 @@ export default function StudioPage() {
                 <label className="text-sm font-medium text-gray-700">Duygu</label>
                 <div className="relative">
                     <button
-                        onClick={() => setIsEmotionDropdownOpen(!isEmotionDropdownOpen)}
+                        onClick={() => {
+                            setIsEmotionDropdownOpen(!isEmotionDropdownOpen);
+                            setIsLanguageDropdownOpen(false); // Close other dropdown
+                        }}
                         className="w-full bg-white border border-gray-200 rounded-xl p-3 flex items-center justify-between hover:border-gray-300 transition-all text-left"
                     >
                         <span className="flex items-center gap-2">
@@ -375,9 +428,10 @@ export default function StudioPage() {
       
       {/* ================= EDITOR AREA ================= */}
       <div className="flex-1 flex flex-col relative z-0 bg-white">
-        <header className="h-16 flex items-center justify-between px-8 border-b border-gray-100">
-            <h1 className="font-bold text-gray-900 text-lg tracking-tight">Metin Stüdyosu</h1>
-            <div className="hidden lg:flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
+        <header className="h-16 flex items-center justify-between px-4 lg:px-8 border-b border-gray-100">
+            <h1 className="font-bold text-gray-900 text-lg tracking-tight hidden sm:block">Metin Stüdyosu</h1>
+            {/* CREDITS: Visible on Mobile now */}
+            <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200 ml-auto sm:ml-0">
                  <div className={`w-1.5 h-1.5 rounded-full ${userData?.credits && userData.credits > 1000 ? 'bg-green-500' : 'bg-orange-500'}`}></div>
                  <span className="text-xs font-semibold text-gray-600">{userData?.credits?.toLocaleString() ?? 0} kredi</span>
             </div>
@@ -387,7 +441,7 @@ export default function StudioPage() {
             <textarea
                 value={studioParams.text}
                 onChange={(e) => updateParam('text', e.target.value)}
-                className="w-full h-full resize-none border-none focus:ring-0 text-xl leading-relaxed text-gray-800 placeholder-gray-300 bg-transparent p-8 pb-40 lg:pb-32 custom-scrollbar"
+                className="w-full h-full resize-none border-none focus:ring-0 text-xl leading-relaxed text-gray-800 placeholder-gray-300 bg-transparent p-4 sm:p-8 pb-40 lg:pb-32 custom-scrollbar"
                 placeholder="Buraya metninizi yazın..."
                 spellCheck={false}
             />
@@ -487,7 +541,7 @@ export default function StudioPage() {
         </div>
       </div>
 
-      {/* ================= MOBİL OVERLAYS (EKLENDİ) ================= */}
+      {/* ================= MOBİL OVERLAYS ================= */}
       {activeMobileView && (
         <div className="lg:hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center">
             <div className="absolute inset-0 bg-black/20 backdrop-blur-sm transition-opacity" onClick={() => setActiveMobileView(null)} />
@@ -500,9 +554,7 @@ export default function StudioPage() {
                         <X className="w-5 h-5" />
                     </button>
                 </div>
-                {/* Burada "pb-40" vererek, mobile player'ın alt kısmında kalan 
-                   içeriğin scroll edilince görünmesini sağlıyoruz. 
-                */}
+                
                 <div className="p-4 overflow-y-auto custom-scrollbar flex-1 pb-40">
                     {activeMobileView === 'voice_select' && <VoiceListContent onSelect={(id) => { updateParam('voice_id', id); setActiveMobileView(null); }} />}
                     {activeMobileView === 'settings' && <SettingsContent />}

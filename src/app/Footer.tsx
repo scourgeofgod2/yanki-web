@@ -1,9 +1,210 @@
-import React from 'react';
-import { Twitter, Instagram, Linkedin, Github, Mic, Wand2, Globe } from 'lucide-react';
+'use client';
+
+import React, { useState } from 'react';
+import { Twitter, Instagram, Linkedin, Github, Mic, Wand2, Globe, Check, Star } from 'lucide-react';
 
 const Footer = () => {
+  const [isYearly, setIsYearly] = useState(false);
+
+  const plans = [
+    {
+      name: "Başlangıç",
+      price: isYearly ? 891 : 99,
+      originalPrice: isYearly ? 1188 : null,
+      description: "Hobiler ve küçük projeler için ideal başlangıç paketi",
+      buttonText: "Başlangıç'ı Al",
+      buttonStyle: "border border-blue-300 text-blue-700 hover:bg-blue-50",
+      features: [
+        "50.000 kredi/ay",
+        "Tüm ses karakterleri (31 ses)",
+        "Yüksek kalite (44kHz)",
+        "Çoklu format (MP3, WAV)",
+        "Duygu kontrolü",
+        "3 ses klonlama hakkı",
+        "20+ dil desteği"
+      ],
+      planType: "Plan İçeriği:"
+    },
+    {
+      name: "Popüler",
+      price: isYearly ? 2691 : 299,
+      originalPrice: isYearly ? 3588 : null,
+      description: "Profesyonel kullanım için en popüler paket",
+      buttonText: "Popüler'i Al",
+      buttonStyle: "bg-purple-600 text-white hover:bg-purple-700",
+      popular: true,
+      features: [
+        "200.000 kredi/ay",
+        "Tüm ses karakterleri (31 ses)",
+        "Stüdyo kalite (48kHz)",
+        "Tüm formatlar",
+        "Gelişmiş duygu kontrolü",
+        "5 ses klonlama hakkı",
+        "API erişimi",
+        "Ticari kullanım"
+      ],
+      planType: "Başlangıç'taki her şey, artı:"
+    },
+    {
+      name: "Kurumsal",
+      price: isYearly ? 5391 : 599,
+      originalPrice: isYearly ? 7188 : null,
+      description: "Büyük işletmeler için kapsamlı çözüm",
+      buttonText: "Kurumsal'ı Al",
+      buttonStyle: "bg-slate-900 text-white hover:bg-slate-800",
+      features: [
+        "500.000 kredi/ay",
+        "Premium kalite (48kHz)",
+        "10 ses klonlama hakkı",
+        "Özel API limitleri",
+        "Özel destek",
+        "SLA garantisi",
+        "Ticari kullanım",
+        "Kurumsal güvenlik"
+      ],
+      planType: "Popüler'deki her şey, artı:"
+    }
+  ];
+
+  // Testimonials data
+  const testimonials = [
+    {
+      id: 1,
+      name: "Ahmet Kaya",
+      role: "Content Creator",
+      company: "Digital Agency",
+      rating: 5,
+      comment: "Yankı ile podcast'lerimi profesyonel kalitede seslendiriyorum. Ses klonlama özelliği gerçekten büyüleyici!",
+      avatar: "AK",
+      avatarColor: "bg-blue-500"
+    },
+    {
+      id: 2,
+      name: "Zeynep Arslan",
+      role: "Marketing Director",
+      company: "TechStart",
+      rating: 5,
+      comment: "Reklam filmlerimiz için mükemmel çözüm. Hem hızlı hem de çok kaliteli sonuçlar alıyoruz.",
+      avatar: "ZA",
+      avatarColor: "bg-purple-500"
+    },
+    {
+      id: 3,
+      name: "Murat Demir",
+      role: "YouTuber",
+      company: "1M Subscriber",
+      rating: 5,
+      comment: "Video içeriklerim için vazgeçilmez hale geldi. API entegrasyonu sayesinde workflow'um çok hızlandı.",
+      avatar: "MD",
+      avatarColor: "bg-green-500"
+    },
+    {
+      id: 4,
+      name: "Elif Özkan",
+      role: "E-learning Specialist",
+      company: "EduTech",
+      rating: 5,
+      comment: "Online kurslarımızı 20+ dilde sunabiliyoruz. Öğrencilerimizden harika geri dönüşler alıyoruz.",
+      avatar: "EÖ",
+      avatarColor: "bg-pink-500"
+    },
+    {
+      id: 5,
+      name: "Can Yılmaz",
+      role: "Audio Producer",
+      company: "Studio Pro",
+      rating: 5,
+      comment: "Stüdyo kalitesinde ses üretimi için ideal platform. Türkçe ses karakterleri gerçekten başarılı.",
+      avatar: "CY",
+      avatarColor: "bg-orange-500"
+    },
+    {
+      id: 6,
+      name: "Selin Aktaş",
+      role: "Brand Manager",
+      company: "Fashion Co.",
+      rating: 5,
+      comment: "Marka kimliğimize uygun sesler oluşturabiliyoruz. Müşteri deneyimi çok gelişti.",
+      avatar: "SA",
+      avatarColor: "bg-teal-500"
+    }
+  ];
+
   return (
     <footer className="bg-white border-t border-slate-100 font-sans relative overflow-hidden">
+      
+      {/* --- TESTIMONIALS SECTION --- */}
+      <div className="bg-slate-50 py-20">
+        <div className="max-w-6xl mx-auto px-6">
+          
+          {/* Section Header */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
+              <Star size={16} className="fill-current" />
+              Highly Rated and Recommended
+            </div>
+            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
+              Kullanıcılarımız Ne Diyor?
+            </h2>
+            <p className="text-slate-600 max-w-2xl mx-auto">
+              Binlerce kullanıcı Yankı ile içeriklerini dönüştürüyor ve başarılarını paylaşıyor.
+            </p>
+          </div>
+
+          {/* Testimonials Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {testimonials.map((testimonial) => (
+              <div key={testimonial.id} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-all duration-300">
+                
+                {/* Rating Stars */}
+                <div className="flex gap-1 mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} size={16} className="fill-yellow-400 text-yellow-400" />
+                  ))}
+                </div>
+
+                {/* Comment */}
+                <p className="text-slate-700 text-sm leading-relaxed mb-6">
+                  "{testimonial.comment}"
+                </p>
+
+                {/* User Info */}
+                <div className="flex items-center gap-3">
+                  <div className={`w-12 h-12 ${testimonial.avatarColor} rounded-full flex items-center justify-center text-white font-bold text-sm`}>
+                    {testimonial.avatar}
+                  </div>
+                  <div>
+                    <div className="font-semibold text-slate-900 text-sm">{testimonial.name}</div>
+                    <div className="text-slate-500 text-xs">
+                      {testimonial.role} • {testimonial.company}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Stats Row */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16 pt-12 border-t border-slate-200">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-slate-900 mb-2">10K+</div>
+              <div className="text-slate-600 text-sm">Aktif Kullanıcı</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-slate-900 mb-2">500K+</div>
+              <div className="text-slate-600 text-sm">Oluşturulan Ses</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-slate-900 mb-2">4.9★</div>
+              <div className="text-slate-600 text-sm">Kullanıcı Puanı</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-slate-900 mb-2">20+</div>
+              <div className="text-slate-600 text-sm">Dil Desteği</div>
+            </div>
+          </div>
+        </div>
+      </div>
       
       {/* --- BÖLÜM 1: CTA (Harekete Geçirici Mesaj) --- */}
       <div className="relative py-24 lg:py-32 flex flex-col items-center justify-center text-center px-6 overflow-hidden">
@@ -63,220 +264,99 @@ const Footer = () => {
       </div>
 
 
-      {/* --- BÖLÜM 2: PRICING TABLE --- */}
-      <div className="bg-slate-50/50 py-20 border-t border-slate-100">
+      {/* --- BÖLÜM 2: MODERN PRICING SECTION --- */}
+      <div className="bg-white py-20 border-t border-slate-100">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
-              Ses Teknolojinizi Seçin
-            </h2>
-            <p className="text-lg text-slate-500 max-w-2xl mx-auto">
-              İhtiyacınıza uygun paketi seçin ve Yankı ile içeriklerinizi daha güçlü hale getirin.
-            </p>
+          
+          {/* Billing Toggle */}
+          <div className="flex justify-center mb-12">
+            <div className="bg-slate-100 rounded-full p-1 flex items-center">
+              <button
+                onClick={() => setIsYearly(false)}
+                className={`px-6 py-2 rounded-full text-sm font-semibold transition-all ${
+                  !isYearly
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Monthly Billing
+              </button>
+              <button
+                onClick={() => setIsYearly(true)}
+                className={`px-6 py-2 rounded-full text-sm font-semibold transition-all relative ${
+                  isYearly
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Yearly Billing
+                {isYearly && (
+                  <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
+                    save 20%
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
 
+          {/* Pricing Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Ücretsiz Plan */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 relative">
-              <div className="text-center mb-8">
-                <h3 className="text-xl font-bold text-slate-900 mb-2">Ücretsiz</h3>
-                <div className="mb-4">
-                  <span className="text-4xl font-bold text-slate-900">₺0</span>
-                  <div className="text-xs text-slate-400 mt-1">~₺0/hafta</div>
+            {plans.map((plan, index) => (
+              <div key={plan.name} className={`rounded-2xl p-8 border-2 relative transition-all duration-300 ${
+                plan.popular
+                  ? 'bg-gradient-to-b from-purple-50/50 to-white border-purple-200 scale-105 shadow-xl'
+                  : 'bg-slate-50 border-slate-200'
+              }`}>
+                
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <div className="bg-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                      En Popüler
+                    </div>
+                  </div>
+                )}
+                
+                {/* Plan Header */}
+                <div className="mb-8">
+                  <h3 className="text-2xl font-bold text-slate-900 mb-2">{plan.name}</h3>
+                  
+                  {/* Price */}
+                  <div className="mb-4">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-4xl font-bold text-slate-900">₺{plan.price}</span>
+                      <span className="text-slate-600">/ay</span>
+                    </div>
+                    {isYearly && plan.originalPrice && (
+                      <div className="text-sm text-slate-500">
+                        <span className="line-through">₺{plan.originalPrice}</span> yıllık ödeme
+                      </div>
+                    )}
+                  </div>
+                  
+                  <p className="text-slate-600 text-sm leading-relaxed">
+                    {plan.description}
+                  </p>
                 </div>
-                <p className="text-sm text-slate-500">Demo ve test için mükemmel</p>
-              </div>
-              
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center">
-                    <svg className="w-2.5 h-2.5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                    </svg>
-                  </div>
-                  Günlük 500 karakter
-                </li>
-                <li className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center">
-                    <svg className="w-2.5 h-2.5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                    </svg>
-                  </div>
-                  4 hazır ses karakteri
-                </li>
-                <li className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center">
-                    <svg className="w-2.5 h-2.5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                    </svg>
-                  </div>
-                  Temel duygu seçenekleri
-                </li>
-              </ul>
-              
-              <button className="w-full bg-slate-100 text-slate-900 py-3 px-6 rounded-xl font-semibold hover:bg-slate-200 transition">
-                Hemen Deneyin
-              </button>
-            </div>
 
-            {/* Başlangıç Plan */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 relative">
-              <div className="text-center mb-8">
-                <h3 className="text-xl font-bold text-slate-900 mb-2">Başlangıç</h3>
-                <div className="mb-4">
-                  <span className="text-4xl font-bold text-slate-900">₺99</span>
-                  <span className="text-slate-500">/ay</span>
-                  <div className="text-xs text-slate-400 mt-1">~₺25/hafta</div>
-                </div>
-                <p className="text-sm text-slate-500">Küçük projeler için ideal</p>
-              </div>
-              
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center">
-                    <svg className="w-2.5 h-2.5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                    </svg>
-                  </div>
-                  50.000 kredi/ay
-                </li>
-                <li className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center">
-                    <svg className="w-2.5 h-2.5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                    </svg>
-                  </div>
-                  Tüm ses karakterleri
-                </li>
-                <li className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center">
-                    <svg className="w-2.5 h-2.5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                    </svg>
-                  </div>
-                  Tüm duygular
-                </li>
-                <li className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center">
-                    <svg className="w-2.5 h-2.5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                    </svg>
-                  </div>
-                  İndirme geçmişi
-                </li>
-              </ul>
-              
-              <button className="w-full bg-blue-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-blue-700 transition">
-                Satın Al
-              </button>
-            </div>
+                {/* CTA Button */}
+                <button className={`w-full py-3 px-6 rounded-xl font-semibold transition-all mb-8 ${plan.buttonStyle}`}>
+                  {plan.buttonText}
+                </button>
 
-            {/* Popüler Plan */}
-            <div className="bg-white rounded-2xl p-8 shadow-xl border-2 border-blue-200 relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 bg-blue-600 text-white text-center py-2 text-xs font-bold">
-                EN POPÜLER
-              </div>
-              <div className="text-center mb-8 mt-4">
-                <h3 className="text-xl font-bold text-slate-900 mb-2">Popüler</h3>
-                <div className="mb-4">
-                  <span className="text-4xl font-bold text-slate-900">₺299</span>
-                  <span className="text-slate-500">/ay</span>
-                  <div className="text-xs text-slate-400 mt-1">~₺75/hafta</div>
+                {/* Features */}
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-900 mb-4">{plan.planType}</h4>
+                  <ul className="space-y-3">
+                    {plan.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-start gap-3 text-sm text-slate-700">
+                        <Check size={16} className="text-slate-900 mt-0.5 flex-shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <p className="text-sm text-slate-500">Orta ölçekli işletmeler için</p>
               </div>
-              
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center">
-                    <svg className="w-2.5 h-2.5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                    </svg>
-                  </div>
-                  200.000 kredi/ay
-                </li>
-                <li className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center">
-                    <svg className="w-2.5 h-2.5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                    </svg>
-                  </div>
-                  Tüm ses karakterleri
-                </li>
-                <li className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center">
-                    <svg className="w-2.5 h-2.5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                    </svg>
-                  </div>
-                  Tüm duygular
-                </li>
-                <li className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center">
-                    <svg className="w-2.5 h-2.5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                    </svg>
-                  </div>
-                  İndirme geçmişi
-                </li>
-              </ul>
-              
-              <button className="w-full bg-blue-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-blue-700 transition">
-                Satın Al
-              </button>
-            </div>
-
-            {/* Kurumsal Plan */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 relative">
-              <div className="text-center mb-8">
-                <h3 className="text-xl font-bold text-slate-900 mb-2">Kurumsal</h3>
-                <div className="mb-4">
-                  <span className="text-4xl font-bold text-slate-900">₺599</span>
-                  <span className="text-slate-500">/ay</span>
-                  <div className="text-xs text-slate-400 mt-1">~₺150/hafta</div>
-                </div>
-                <p className="text-sm text-slate-500">Büyük şirketler için</p>
-              </div>
-              
-              <ul className="space-y-3 mb-8">
-                <li className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-4 h-4 bg-purple-100 rounded-full flex items-center justify-center">
-                    <svg className="w-2.5 h-2.5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                    </svg>
-                  </div>
-                  500.000 kredi/ay
-                </li>
-                <li className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-4 h-4 bg-purple-100 rounded-full flex items-center justify-center">
-                    <svg className="w-2.5 h-2.5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                    </svg>
-                  </div>
-                  Tüm ses karakterleri
-                </li>
-                <li className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-4 h-4 bg-purple-100 rounded-full flex items-center justify-center">
-                    <svg className="w-2.5 h-2.5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                    </svg>
-                  </div>
-                  Tüm duygular
-                </li>
-                <li className="flex items-center gap-2 text-sm text-slate-600">
-                  <div className="w-4 h-4 bg-purple-100 rounded-full flex items-center justify-center">
-                    <svg className="w-2.5 h-2.5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
-                    </svg>
-                  </div>
-                  İndirme geçmişi
-                </li>
-              </ul>
-              
-              <button className="w-full bg-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-purple-700 transition">
-                İletişime Geçin
-              </button>
-            </div>
+            ))}
           </div>
         </div>
       </div>
