@@ -6,8 +6,7 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // RAM tasarrufu sağlar
-  productionBrowserSourceMaps: false, 
+  productionBrowserSourceMaps: false,
   images: {
     remotePatterns: [
       {
@@ -15,6 +14,12 @@ const nextConfig = {
         hostname: '**',
       },
     ],
+  },
+  // İŞTE O HATAYI ÇÖZEN SİHİRLİ AYAR BURASI:
+  webpack: (config) => {
+    // Sembolik linkleri (symlinks) gerçek yollarına çevirme, olduğu gibi kullan
+    config.resolve.symlinks = false;
+    return config;
   },
 };
 
