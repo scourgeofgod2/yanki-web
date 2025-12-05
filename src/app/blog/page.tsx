@@ -112,7 +112,7 @@ export default function BlogPage() {
                     </h3>
                     
                     <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                      {post.excerpt}
+                      {post.description}
                     </p>
                     
                     <div className="flex items-center justify-between text-sm text-gray-500">

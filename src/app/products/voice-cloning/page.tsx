@@ -503,7 +503,7 @@ export default function VoiceCloningPage() {
                   <p className="text-gray-600 text-sm mb-4">{model.description}</p>
                   
                   <div className="text-3xl font-bold text-gray-900 mb-2">
-                    {model.credits.toLocaleString('tr-TR')} Kredi
+                    {model.credits} Kredi
                   </div>
                   <div className="text-sm text-gray-500 mb-4">
                     {model.minutes} ses üretimi • {model.quality}

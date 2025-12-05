@@ -557,7 +557,7 @@ export default function TranscribePage() {
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">{plan.name}</h3>
                   <div className="text-3xl font-bold text-gray-900 mb-1">
                     {plan.price === 0 ? 'Ücretsiz' : `₺${plan.price}`}
-                    {plan.price > 0 && <span className="text-base font-normal text-gray-500">/ay</span>}
+                    {typeof plan.price === 'number' && plan.price > 0 && <span className="text-base font-normal text-gray-500">/ay</span>}
                   </div>
                   <div className="text-sm text-gray-500">{plan.minutes} dakika transkripsiyon</div>
                 </div>
