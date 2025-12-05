@@ -51,16 +51,23 @@ model User {
   updatedAt     DateTime  @updatedAt @map("updated_at")
   
   // Yanki specific fields
-  credits       Int       @default(500) // Free users get 500 credits (daily limit)
-  plan          String    @default("free") // free, starter, popular, enterprise
+  credits       Int       @default(1000) // Free trial: 1000 characters
+  plan          String    @default("free") // free, baslangic, icerik, profesyonel, kurumsal
   subscriptionExpires DateTime? @map("subscription_expires")
-  voiceCloningLimit Int   @default(1) @map("voice_cloning_limit") // Free: 1, starter: 3, popular: 5, enterprise: 10
+  voiceCloningLimit Int   @default(0) @map("voice_cloning_limit") // Free: 0, baslangic: 5, icerik: 10, profesyonel: 20, kurumsal: 50
+  characterLimit Int      @default(1000) @map("character_limit") // Free: 1000, baslangic: 100000, icerik: 300000, profesyonel: 750000, kurumsal: 3000000
+  usedCharacters Int      @default(0) @map("used_characters") // Used characters this month
+  resetDate     DateTime  @default(now()) @map("reset_date") // When to reset used_characters
+  isYearly      Boolean   @default(false) @map("is_yearly") // Yearly subscription flag with 15% discount
   
   accounts      Account[]
   sessions      Session[]
   history       History[]
   clonedVoices  ClonedVoice[]
   favorites     Favorite[]
+  subscriptions Subscription[]
+  usageRecords  UsageRecord[]
+  paymentRecords PaymentRecord[]
 
   @@map("users")
 }
@@ -114,6 +121,81 @@ model ClonedVoice {
   @@map("cloned_voices")
 }
 
+model Subscription {
+  id              String   @id @default(cuid())
+  userId          String   @map("user_id")
+  planType        String   @map("plan_type") // free, baslangic, icerik, profesyonel, kurumsal
+  characterLimit  Int      @map("character_limit") // baslangic: 100000, icerik: 300000, profesyonel: 750000, kurumsal: 3000000
+  voiceCloneLimit Int      @map("voice_clone_limit") // baslangic: 5, icerik: 10, profesyonel: 20, kurumsal: 50
+  isYearly        Boolean  @default(false) @map("is_yearly") // Yearly subscription with 15% discount
+  amount          Float    // Paid amount in TL - baslangic: 89₺, icerik: 199₺, profesyonel: 399₺, kurumsal: 2999₺
+  currency        String   @default("TL")
+  status          String   @default("active") // active, cancelled, expired
+  startDate       DateTime @map("start_date")
+  endDate         DateTime @map("end_date")
+  cancelAtPeriodEnd Boolean @default(false) @map("cancel_at_period_end")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usageRecords UsageRecord[]
+  
+  @@index([userId])
+  @@index([status])
+  @@index([endDate])
+  @@map("subscriptions")
+}
+
+model UsageRecord {
+  id             String   @id @default(cuid())
+  userId         String   @map("user_id")
+  subscriptionId String?  @map("subscription_id")
+  serviceType    String   @map("service_type") // tts, voice_cloning, transcribe
+  charactersUsed Int      @default(0) @map("characters_used") // For TTS
+  minutesUsed    Float    @default(0) @map("minutes_used") // For transcribe
+  voicesCloned   Int      @default(0) @map("voices_cloned") // For voice cloning
+  cost           Float    @default(0) // Cost in TL
+  month          Int      // 1-12
+  year           Int      // 2024, 2025, etc
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+  
+  @@index([userId])
+  @@index([month, year])
+  @@index([serviceType])
+  @@unique([userId, month, year, serviceType])
+  @@map("usage_records")
+}
+
+model PaymentRecord {
+  id             String   @id @default(cuid())
+  userId         String   @map("user_id")
+  subscriptionId String?  @map("subscription_id")
+  paymentType    String   @map("payment_type") // subscription, credits, transcribe
+  amount         Float    // Amount in TL
+  currency       String   @default("TL")
+  paymentMethod  String   @map("payment_method") // credit_card, bank_transfer, etc
+  status         String   @default("pending") // pending, completed, failed, refunded
+  paymentProvider String? @map("payment_provider") // stripe, paytr, etc
+  providerTransactionId String? @map("provider_transaction_id")
+  description    String?
+  metadata       Json?    // Additional payment metadata
+  paidAt         DateTime? @map("paid_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([status])
+  @@index([paymentType])
+  @@index([paidAt])
+  @@map("payment_records")
+}
+
 model Favorite {
   id          String   @id @default(cuid())
   userId      String   @map("user_id")
@@ -126,4 +208,24 @@ model Favorite {
   @@unique([userId, voiceId]) // Bir kullanıcı bir sesi sadece bir kez favorilere ekleyebilir
   @@index([userId])
   @@map("favorites")
+}
+
+model PaymentNotification {
+  id           String   @id @default(cuid())
+  customerName String   @map("customer_name")
+  email        String
+  plan         String   // baslangic, icerik, profesyonel, kurumsal
+  amount       Float    // Payment amount in TL
+  currency     String   @default("TL")
+  status       String   @default("pending") // pending, approved, rejected
+  adminNotes   String?  @map("admin_notes") @db.Text
+  approvedAt   DateTime? @map("approved_at")
+  rejectedAt   DateTime? @map("rejected_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  
+  @@index([status])
+  @@index([createdAt])
+  @@index([email])
+  @@map("payment_notifications")
 }

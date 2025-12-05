@@ -3,51 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import { Check, X, Star, Zap, Crown, Users, Clock, TrendingUp, AlertCircle } from 'lucide-react';
-
-// Navigation için authentication butonları
-function AuthButtons() {
-  const { data: session, status } = useSession();
-
-  if (status === 'loading') {
-    return (
-      <div className="flex items-center gap-4">
-        <div className="w-20 h-8 bg-slate-200 animate-pulse rounded"></div>
-        <div className="w-16 h-8 bg-slate-200 animate-pulse rounded"></div>
-      </div>
-    );
-  }
-
-  if (session) {
-    return (
-      <div className="flex items-center gap-4">
-        <Link href="/" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition">
-          Ana Sayfa
-        </Link>
-        <Link href="/dashboard" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition">
-          Panel
-        </Link>
-        <Link href="/api/auth/signout" className="bg-slate-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-slate-800 transition">
-          Çıkış
-        </Link>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex items-center gap-4">
-      <Link href="/" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition">
-        Ana Sayfa
-      </Link>
-      <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition">
-        Giriş Yap
-      </Link>
-      <Link href="/register" className="bg-slate-900 text-white text-sm px-4 py-2 rounded-lg hover:bg-slate-800 transition">
-        Kayıt Ol
-      </Link>
-    </div>
-  );
-}
+import { Check, X, Star, Zap, Crown, Users, Clock, TrendingUp, AlertCircle, Building2 } from 'lucide-react';
+import Navbar from '@/components/Navbar';
 
 // Countdown Timer Component
 function CountdownTimer({ targetDate }: { targetDate: Date }) {
@@ -96,102 +53,123 @@ const PricingPage = () => {
   monthEndDate.setDate(0);
   monthEndDate.setHours(23, 59, 59, 999);
 
+  // Karakter to dakika hesaplama fonksiyonu
+  const calculateMinutes = (characters: number) => {
+    // Ortalama 1000 karakter = 1.2 dakika ses (0.0029 TL/char * 1000 = 2.9 TL)
+    return Math.round((characters / 1000) * 1.2);
+  };
+
   const plans = [
     {
-      id: 'free',
-      name: 'Ücretsiz',
-      price: 0,
-      weeklyPrice: 0,
-      yearlyPrice: 0,
-      description: 'Keşif için mükemmel',
+      id: 'baslangic',
+      name: 'Başlangıç Paketi',
+      price: isYearly ? 712 : 89,
+      originalPrice: isYearly ? 1068 : 133.5,
+      yearlyDiscount: 20,
+      characters: 30000,
+      voiceClones: 5,
+      description: 'Yeni başlayanlar için ideal',
       icon: <Users className="w-6 h-6 text-green-600" />,
       color: 'green',
       features: [
-        'Günlük 500 karakter',
-        '4 hazır ses karakteri',
+        `30,000 karakter/ay (~${calculateMinutes(30000)} dakika ses/ay)`,
+        '5 ses klonlama hakkı',
+        '20+ dil desteği',
         'Temel kalite (22kHz)',
-        'MP3 indirme',
-        'Topluluk desteği'
+        'MP3, WAV format desteği',
+        'Email destek',
+        'Ticari kullanım hakkı'
       ],
       limitations: [
-        'Tüm ses karakterleri yok',
-        'Ses klonlama yok',
         'API erişimi yok',
         'Öncelik desteği yok'
       ],
-      cta: 'Ücretsiz Başla'
+      cta: 'Başlangıç Paketi'
     },
     {
-      id: 'starter',
-      name: 'Başlangıç',
-      price: isYearly ? 891 : 99,
-      weeklyPrice: 25,
-      yearlyPrice: 891,
-      description: 'Hobiler ve küçük projeler',
+      id: 'icerik',
+      name: 'İçerik Üreticisi',
+      price: isYearly ? 1592 : 199,
+      originalPrice: isYearly ? 2388 : 298.5,
+      yearlyDiscount: 20,
+      characters: 100000,
+      voiceClones: 10,
+      description: 'Düzenli içerik üreticileri için',
       icon: <Star className="w-6 h-6 text-blue-600" />,
       color: 'blue',
       features: [
-        '50.000 kredi/ay',
-        'Tüm ses karakterleri (31 ses)',
-        'Yüksek kalite (44kHz)',
-        'Çoklu format (MP3, WAV)',
-        'Duygu kontrolü',
-        '3 ses klonlama hakkı',
+        `100,000 karakter/ay (~${calculateMinutes(100000)} dakika ses/ay)`,
+        '10 ses klonlama hakkı',
         '20+ dil desteği',
-        'Öncelik desteği'
+        'Yüksek kalite (44kHz)',
+        'Tüm formatlar (MP3, WAV, OGG)',
+        'SSML desteği ile gelişmiş kontrol',
+        'Toplu metin işleme',
+        'Öncelik email destek',
+        'Ticari kullanım hakkı'
       ],
       limitations: [
-        'API erişimi yok'
+        'API erişimi sınırlı'
       ],
-      cta: 'Başlangıç\'ı Al'
+      cta: 'İçerik Üreticisi'
     },
     {
-      id: 'popular',
-      name: 'Popüler',
-      price: isYearly ? 2691 : 299,
-      weeklyPrice: 75,
-      yearlyPrice: 2691,
-      description: 'Profesyonel kullanım',
+      id: 'profesyonel',
+      name: 'Profesyonel',
+      price: isYearly ? 3192 : 399,
+      originalPrice: isYearly ? 4788 : 598.5,
+      yearlyDiscount: 20,
+      characters: 250000,
+      voiceClones: 20,
+      description: 'Profesyonel kullanım için en iyi seçim',
       icon: <Crown className="w-6 h-6 text-purple-600" />,
       color: 'purple',
       popular: true,
       features: [
-        '200.000 kredi/ay',
-        'Tüm ses karakterleri (31 ses)',
+        `250,000 karakter/ay (~${calculateMinutes(250000)} dakika ses/ay)`,
+        '20 ses klonlama hakkı',
+        '20+ dil desteği',
         'Stüdyo kalite (48kHz)',
-        'Tüm formatlar',
-        'Gelişmiş duygu kontrolü',
-        '5 ses klonlama hakkı',
-        'API erişimi',
-        'Öncelik desteği',
-        'Ticari kullanım'
+        'Tüm premium formatlar',
+        'Gelişmiş SSML ve duygu kontrolü',
+        'Toplu işleme ve API erişimi',
+        'Öncelik destek (24 saat içinde yanıt)',
+        'Ticari kullanım ve revizyon hakkı',
+        'Custom voice training'
       ],
       limitations: [],
-      cta: 'Popüler\'i Al'
+      cta: 'En Popüler - Profesyonel'
     },
     {
-      id: 'enterprise',
+      id: 'kurumsal',
       name: 'Kurumsal',
-      price: isYearly ? 5391 : 599,
-      weeklyPrice: 150,
-      yearlyPrice: 5391,
-      description: 'Büyük işletmeler için',
-      icon: <Zap className="w-6 h-6 text-orange-600" />,
+      price: isYearly ? 23992 : 2999,
+      originalPrice: isYearly ? 35988 : 4498.5,
+      yearlyDiscount: 20,
+      characters: 2000000,
+      voiceClones: 50,
+      description: 'Büyük ölçekli işletmeler için tam çözüm',
+      icon: <Building2 className="w-6 h-6 text-orange-600" />,
       color: 'orange',
+      enterprise: true,
       features: [
-        '500.000 kredi/ay',
-        'Tüm ses karakterleri (31 ses)',
-        'Premium kalite (48kHz)',
-        'Tüm formatlar',
-        'Gelişmiş duygu kontrolü',
-        '10 ses klonlama hakkı',
-        'Özel API limitleri',
-        'Özel destek',
-        'SLA garantisi',
-        'Ticari kullanım'
+        `2,000,000 karakter/ay (~${calculateMinutes(2000000)} dakika ses/ay)`,
+        '50 ses klonlama hakkı',
+        'Tüm dünya dillerinde destek',
+        'Broadcast kalite (48kHz+)',
+        'Özel format desteği',
+        'Advanced AI ses klonlama',
+        'Unlimited API calls',
+        '7/24 premium destek',
+        'SLA garantisi (%99.9 uptime)',
+        'Özel entegrasyon desteği',
+        'Dedicated account manager',
+        'Custom AI model training',
+        'White-label çözümü'
       ],
       limitations: [],
-      cta: 'Kurumsal\'ı Al'
+      cta: 'Kurumsal Çözüm',
+      reverse: true
     }
   ];
 
@@ -228,16 +206,7 @@ const PricingPage = () => {
   return (
     <div className="min-h-screen bg-white font-['Inter',ui-sans-serif,system-ui,-apple-system,sans-serif]">
       {/* NAVBAR */}
-      <nav className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between border-b border-slate-100">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M12 2v20"/><path d="M4.93 10.93a10 10 0 0 1 14.14 0"/></svg>
-          </div>
-          <span className="text-2xl font-bold tracking-tight text-slate-900 font-['Inter']">Yankı</span>
-        </Link>
-
-        <AuthButtons />
-      </nav>
+      <Navbar />
 
       {/* HERO SECTION */}
       <section className="py-20 text-center">
@@ -246,7 +215,7 @@ const PricingPage = () => {
           <div className="inline-flex items-center gap-2 bg-red-50 border border-red-200 rounded-full px-4 py-1.5 mb-4 animate-pulse">
             <AlertCircle size={14} className="text-red-600" />
             <span className="text-xs font-bold text-red-700 tracking-wide uppercase font-['Inter']">
-              🔥 Bu Ay Sonuna Kadar %50 İNDİRİM
+              🔥 Yıllık Paketlerde %20 İNDİRİM
             </span>
           </div>
           
@@ -262,7 +231,7 @@ const PricingPage = () => {
           <div className="inline-flex items-center gap-2 bg-green-50 border border-green-100 rounded-full px-4 py-1.5 mb-6">
             <TrendingUp size={14} className="text-green-600" />
             <span className="text-xs font-medium text-green-700 font-['Inter']">
-              Son 24 saatte 127 kişi üye oldu • Sadece bu ayın son 23 üyeliği kaldı!
+              Son 24 saatte 89 kişi paket satın aldı • Bu ayın en popüler fiyatları!
             </span>
           </div>
           
@@ -298,152 +267,50 @@ const PricingPage = () => {
               <span className={`text-sm font-medium font-['Inter'] ${isYearly ? 'text-slate-900' : 'text-slate-500'}`}>
                 Yıllık
               </span>
-              <span className="bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded font-['Inter'] animate-bounce">
-                %50 İNDİRİM + 35% EKSTRA!
+              <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded font-['Inter'] animate-bounce">
+                %20 İNDİRİM!
               </span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CREDIT PACKAGES */}
-      <section className="pb-10">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4 font-['Inter']">
-              💳 Kredi Paketleri
-            </h2>
-            <p className="text-slate-600 font-['Inter']">
-              İhtiyacınıza göre kredi satın alın, istediğiniz zaman kullanın
-            </p>
-            <div className="mt-4 inline-flex items-center gap-2 bg-orange-50 text-orange-700 px-3 py-1 rounded-full text-sm font-['Inter']">
-              <span>⚡</span>
-              <span>Bu hafta 234 paket satıldı!</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-16">
-            {[
-              { credits: 20000, price: 39, popular: false, color: 'blue' },
-              { credits: 50000, price: 79, popular: true, color: 'purple' },
-              { credits: 100000, price: 149, popular: false, color: 'green' },
-              { credits: 250000, price: 399, popular: false, color: 'orange' },
-              { credits: 600000, price: 599, popular: false, color: 'red' }
-            ].map((pkg) => (
-              <div
-                key={pkg.credits}
-                className={`relative bg-white rounded-3xl p-6 border-2 shadow-lg hover:shadow-xl transition-all duration-300 ${
-                  pkg.popular 
-                    ? 'border-purple-200 scale-105 bg-gradient-to-b from-purple-50/50 to-white' 
-                    : 'border-gray-200'
-                }`}
-              >
-                {pkg.popular && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <div className="bg-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                      En Popüler
-                    </div>
-                  </div>
-                )}
-
-                <div className="text-center">
-                  <div className="text-2xl mb-4">💎</div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-2">
-                    {pkg.credits.toLocaleString('tr-TR')} Kredi
-                  </h3>
-                  <div className="text-3xl font-bold text-slate-900 mb-4">
-                    ₺{pkg.price}
-                  </div>
-                  <div className="text-sm text-slate-500 mb-6">
-                    ~₺{(pkg.price / (pkg.credits / 1000)).toFixed(2)} / 1K kredi
-                  </div>
-                  
-                  {status === 'loading' ? (
-                    <div className="w-full py-3 px-4 rounded-xl bg-slate-200 animate-pulse">
-                      <span className="text-transparent">Yükleniyor...</span>
-                    </div>
-                  ) : session ? (
-                    <Link href="/dashboard">
-                      <button className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-colors hover:opacity-90 ${
-                        pkg.popular ? 'bg-purple-600' : 'bg-blue-600'
-                      }`}>
-                        Panele Git
-                      </button>
-                    </Link>
-                  ) : (
-                    <Link href="/register">
-                      <button className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-colors hover:opacity-90 ${
-                        pkg.popular ? 'bg-purple-600' : 'bg-blue-600'
-                      }`}>
-                        Satın Al
-                      </button>
-                    </Link>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-3xl p-8 border border-orange-200">
-            <div className="text-center">
-              <h3 className="text-2xl font-bold text-orange-900 mb-4">🎙️ Ses Klonlama Fiyatları</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-                <div className="bg-white rounded-2xl p-6 border border-orange-200">
-                  <div className="text-lg font-semibold text-slate-900 mb-2">HD Kalite Model</div>
-                  <div className="text-3xl font-bold text-slate-900 mb-2">50,000 Kredi</div>
-                  <div className="text-sm text-slate-600">En yüksek kalite, profesyonel ses klonlama</div>
-                </div>
-                <div className="bg-white rounded-2xl p-6 border border-green-200 relative">
-                  <div className="absolute -top-2 right-2">
-                    <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold">%60 İndirim</span>
-                  </div>
-                  <div className="text-lg font-semibold text-slate-900 mb-2">Turbo Model</div>
-                  <div className="text-3xl font-bold text-slate-900 mb-2">20,000 Kredi</div>
-                  <div className="text-sm text-slate-600">Hızlı ve ekonomik, iyi kalite</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SUBSCRIPTION PLANS */}
+      {/* MAIN PRICING PLANS */}
       <section className="pb-20">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
+          <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-slate-900 mb-4 font-['Inter']">
-              📊 Aylık Abonelik Planları
+              🎯 Aylık Abonelik Paketleri
             </h2>
             <p className="text-slate-600 font-['Inter']">
-              Düzenli kullanım için en uygun fiyatlı seçenekler
+              Düzenli kullanım için en uygun fiyatlı seçenekler - İhtiyacınıza göre seçin
             </p>
-            <div className="mt-4 space-y-2">
-              <div className="inline-flex items-center gap-2 bg-red-50 text-red-700 px-3 py-1 rounded-full text-sm font-['Inter']">
-                <span>🔥</span>
-                <span>Bu ay sonuna kadar %50 indirim!</span>
-              </div>
-              <div className="block">
-                <span className="inline-flex items-center gap-2 bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-sm font-['Inter']">
-                  <span>👥</span>
-                  <span>Bu ayın son 23 üyeliği • Kaçırma!</span>
-                </span>
-              </div>
-            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
             {plans.map((plan) => (
               <div
                 key={plan.id}
                 className={`relative bg-white rounded-3xl p-8 border-2 shadow-lg hover:shadow-xl transition-all duration-300 ${
-                  plan.popular 
-                    ? 'border-blue-200 scale-105 bg-gradient-to-b from-blue-50/50 to-white' 
+                  plan.popular
+                    ? 'border-purple-200 scale-105 bg-gradient-to-b from-purple-50/50 to-white lg:-mt-4 lg:mb-4'
+                    : plan.enterprise
+                    ? 'border-orange-200 bg-gradient-to-b from-orange-50/30 to-white'
                     : getColorClasses(plan.color, 'border')
-                } ${plan.popular ? 'lg:-mt-4 lg:mb-4' : ''}`}
+                }`}
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <div className="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-full">
-                      En Popüler
+                    <div className="bg-purple-600 text-white text-xs font-bold px-4 py-2 rounded-full animate-pulse">
+                      🔥 EN POPÜLER
+                    </div>
+                  </div>
+                )}
+
+                {plan.enterprise && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-4 py-2 rounded-full">
+                      👑 PREMIUM
                     </div>
                   </div>
                 )}
@@ -457,47 +324,42 @@ const PricingPage = () => {
                   <p className="text-sm text-slate-500 mb-4">{plan.description}</p>
                   
                   <div className="mb-6">
-                    {typeof plan.price === 'number' ? (
-                      <>
-                        <div className="flex items-end justify-center gap-1">
-                          <span className="text-4xl font-bold text-slate-900">
-                            ₺{plan.price}
-                          </span>
-                          <span className="text-slate-500 text-sm">
-                            /{isYearly ? 'yıl' : 'ay'}
-                          </span>
-                        </div>
-                        {!isYearly && plan.weeklyPrice > 0 && (
-                          <div className="text-sm text-slate-500 mt-1">
-                            ~₺{plan.weeklyPrice}/hafta
-                          </div>
-                        )}
-                        {isYearly && typeof plan.yearlyPrice === 'number' && plan.yearlyPrice > 0 && (
-                          <div className="text-sm text-slate-500 mt-1">
-                            Toplam: ₺{plan.yearlyPrice}/yıl
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="text-3xl font-bold text-slate-900">
-                        {plan.price}
+                    <div className="flex items-end justify-center gap-1 mb-2">
+                      <span className="text-4xl font-bold text-slate-900">
+                        ₺{plan.price.toLocaleString('tr-TR')}
+                      </span>
+                      <span className="text-slate-500 text-sm">
+                        /{isYearly ? 'yıl' : 'ay'}
+                      </span>
+                    </div>
+                    
+                    {isYearly && (
+                      <div className="text-sm text-green-600 mb-2">
+                        <span className="line-through text-slate-400">₺{plan.originalPrice.toLocaleString('tr-TR')}</span>
+                        <span className="ml-2 font-bold">%{plan.yearlyDiscount} tasarruf!</span>
                       </div>
                     )}
+
+                    <div className="text-xs text-slate-500 space-y-1">
+                      <div>
+                        {isYearly
+                          ? `${calculateMinutes(plan.characters) * 12} dakika/yıl`
+                          : `~${calculateMinutes(plan.characters)} dakika ses/ay`
+                        }
+                      </div>
+                      <div>
+                        ₺{(plan.price / (isYearly ? calculateMinutes(plan.characters) * 12 : calculateMinutes(plan.characters))).toFixed(2)}/dakika
+                      </div>
+                    </div>
                   </div>
 
                   {status === 'loading' ? (
                     <div className="w-full py-3 px-6 rounded-xl bg-slate-200 animate-pulse">
                       <span className="text-transparent">Yükleniyor...</span>
                     </div>
-                  ) : session ? (
-                    <Link href="/dashboard">
-                      <button className={`w-full py-3 px-6 rounded-xl font-semibold text-white transition-colors ${getColorClasses(plan.color, 'button')}`}>
-                        Panele Git
-                      </button>
-                    </Link>
                   ) : (
-                    <Link href="/register">
-                      <button className={`w-full py-3 px-6 rounded-xl font-semibold text-white transition-colors ${getColorClasses(plan.color, 'button')}`}>
+                    <Link href={`/payment/${plan.id}`}>
+                      <button className={`w-full py-3 px-6 rounded-xl font-semibold text-white transition-colors ${getColorClasses(plan.color, 'button')} ${plan.popular ? 'animate-pulse' : ''}`}>
                         {plan.cta}
                       </button>
                     </Link>
@@ -507,7 +369,7 @@ const PricingPage = () => {
                 {/* FEATURES */}
                 <div className="space-y-4">
                   <div>
-                    <h4 className="font-semibold text-slate-900 mb-3">Özellikler</h4>
+                    <h4 className="font-semibold text-slate-900 mb-3">✨ Özellikler</h4>
                     <ul className="space-y-2">
                       {plan.features.map((feature, index) => (
                         <li key={index} className="flex items-start gap-3">
@@ -520,7 +382,7 @@ const PricingPage = () => {
 
                   {plan.limitations.length > 0 && (
                     <div>
-                      <h4 className="font-semibold text-slate-900 mb-3">Kısıtlamalar</h4>
+                      <h4 className="font-semibold text-slate-900 mb-3">⚠️ Kısıtlamalar</h4>
                       <ul className="space-y-2">
                         {plan.limitations.map((limitation, index) => (
                           <li key={index} className="flex items-start gap-3">
@@ -538,8 +400,120 @@ const PricingPage = () => {
         </div>
       </section>
 
+      {/* ADDITIONAL SERVICES */}
+      <section className="pb-20 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-slate-900 mb-4 font-['Inter']">
+              🎙️ Ek Hizmetler
+            </h2>
+            <p className="text-slate-600 font-['Inter']">
+              Paketinizi tamamlayan özel hizmetler
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* Seslendirme Per-Character */}
+            <div className="bg-white rounded-3xl p-8 border-2 border-blue-200 shadow-lg">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Zap className="w-8 h-8 text-blue-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-slate-900 mb-2">Karakter Bazlı Seslendirme</h3>
+                <p className="text-slate-600">İhtiyacınız kadar ödeyin</p>
+              </div>
+              
+              <div className="text-center mb-6">
+                <div className="text-4xl font-bold text-blue-600 mb-2">₺0.0029</div>
+                <div className="text-sm text-slate-500">per karakter</div>
+                <div className="text-xs text-slate-400 mt-1">
+                  10,000 karakter = ₺29 (~12 dakika ses)
+                </div>
+              </div>
+
+              <ul className="space-y-2 mb-8">
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  <span className="text-sm text-slate-600">Minimum sipariş yok</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  <span className="text-sm text-slate-600">Kredi kartı ile anında ödeme</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  <span className="text-sm text-slate-600">20+ dil desteği</span>
+                </li>
+              </ul>
+
+              {session ? (
+                <Link href="/dashboard">
+                  <button className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition">
+                    Hemen Kullan
+                  </button>
+                </Link>
+              ) : (
+                <Link href="/register">
+                  <button className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition">
+                    Başla
+                  </button>
+                </Link>
+              )}
+            </div>
+
+            {/* Deşifre Per-Minute */}
+            <div className="bg-white rounded-3xl p-8 border-2 border-green-200 shadow-lg">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Clock className="w-8 h-8 text-green-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-slate-900 mb-2">Dakika Bazlı Deşifre</h3>
+                <p className="text-slate-600">Konuşmayı metne çevirin</p>
+              </div>
+              
+              <div className="text-center mb-6">
+                <div className="text-4xl font-bold text-green-600 mb-2">₺0.65</div>
+                <div className="text-sm text-slate-500">per dakika</div>
+                <div className="text-xs text-slate-400 mt-1">
+                  60 dakika = ₺39 (1 saat ses)
+                </div>
+              </div>
+
+              <ul className="space-y-2 mb-8">
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  <span className="text-sm text-slate-600">%95 doğruluk oranı</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  <span className="text-sm text-slate-600">Türkçe ve İngilizce</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-500" />
+                  <span className="text-sm text-slate-600">Zaman damgası ekleme</span>
+                </li>
+              </ul>
+
+              {session ? (
+                <Link href="/dashboard">
+                  <button className="w-full py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition">
+                    Hemen Kullan
+                  </button>
+                </Link>
+              ) : (
+                <Link href="/register">
+                  <button className="w-full py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition">
+                    Başla
+                  </button>
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ SECTION */}
-      <section className="py-20 bg-slate-50">
+      <section className="py-20">
         <div className="max-w-4xl mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-slate-900 mb-4">
@@ -553,28 +527,32 @@ const PricingPage = () => {
           <div className="space-y-6">
             {[
               {
-                q: "500 karakter hediye nasıl çalışır?",
-                a: "Kayıt olduktan sonra hesabınıza otomatik olarak 500 karakter yüklenir. Bu karakterleri istediğiniz zaman kullanabilirsiniz."
+                q: "Yıllık paketlerde %20 indirim nasıl çalışır?",
+                a: "Yıllık ödeme seçeneğinde tüm paketlerimizde %20 indirim uyguluyoruz. Örneğin, Profesyonel paket aylık 399₺ iken, yıllık ödemede 3,192₺ (ayda 266₺) olur."
               },
               {
-                q: "Aylık paketimi iptal edebilir miyim?",
-                a: "Evet, istediğiniz zaman paketinizi iptal edebilirsiniz. İptal ettiğinizde mevcut dönem sonuna kadar hizmet almaya devam edersiniz."
+                q: "Karakter sınırımı aştığımda ne oluyor?",
+                a: "Karakter sınırınızı aştığınızda otomatik olarak karakter bazlı fiyatlandırmaya (₺0.0029/karakter) geçer. Hiçbir hizmet kesintisi yaşanmaz."
               },
               {
                 q: "Ses klonlama nasıl çalışır?",
-                a: "Premium pakette 3 farklı sesinizi klonlayabilirsiniz. Sadece 30 saniyelik temiz bir ses kaydı yeterli."
+                a: "Paketinizde bulunan ses klonlama hakkınızla 10 dakikalık temiz ses örneği yükleyerek kendi sesinizi klonlayabilirsiniz. İşlem 15-30 dakika içinde tamamlanır."
               },
               {
-                q: "API erişimi kimler için?",
-                a: "Premium ve Kurumsal paket sahipleri API'yi kullanabilir. Geliştiriciler için detaylı dokümantasyon sunuyoruz."
+                q: "İptal etme politikanız nedir?",
+                a: "İstediğiniz zaman paketinizi iptal edebilirsiniz. İptal ettiğinizde mevcut dönem sonuna kadar tüm özelliklerinizi kullanmaya devam edersiniz."
               },
               {
-                q: "Hangi ödeme yöntemlerini kabul ediyorsunuz?",
-                a: "Kredi kartı, banka kartı ve havale ile ödeme kabul ediyoruz. Güvenli ödeme altyapımız ile verileriniz korunur."
+                q: "Kurumsal paket için özel anlaşma yapabilir miyiz?",
+                a: "Elbette! Kurumsal paketimiz tamamen özelleştirilebilir. Özel ses modelleri, API limitleri ve SLA garantileri için satış ekibimizle görüşün."
+              },
+              {
+                q: "Ödeme yöntemleri nelerdir?",
+                a: "Kredi kartı, banka kartı, havale ve kurumsal faturalama seçeneklerimiz mevcut. Tüm ödemeler 256-bit SSL şifreleme ile korunur."
               }
             ].map((faq, index) => (
-              <div key={index} className="bg-white rounded-2xl p-6 border border-slate-100">
-                <h3 className="font-semibold text-slate-900 mb-2">{faq.q}</h3>
+              <div key={index} className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+                <h3 className="font-semibold text-slate-900 mb-3">{faq.q}</h3>
                 <p className="text-slate-600">{faq.a}</p>
               </div>
             ))}
@@ -589,7 +567,7 @@ const PricingPage = () => {
             Hemen Başlamaya Hazır mısınız?
           </h2>
           <p className="text-xl text-blue-100 mb-8">
-            500 karakter hediye ile Yankı'yı deneyin, profesyonel seslendirmenin gücünü keşfedin.
+            Ücretsiz deneme ile Yankı'yı keşfedin, profesyonel seslendirmenin gücünü hissedin.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {status === 'loading' ? (
@@ -621,9 +599,9 @@ const PricingPage = () => {
                     Ücretsiz Başla
                   </button>
                 </Link>
-                <Link href="/dashboard">
+                <Link href="/contact">
                   <button className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold hover:bg-white hover:text-blue-600 transition">
-                    Demo İzle
+                    Satış Ekibiyle Görüş
                   </button>
                 </Link>
               </>
@@ -647,8 +625,8 @@ const PricingPage = () => {
           <div className="flex justify-center gap-8 text-sm">
             <Link href="/" className="hover:text-blue-400 transition">Ana Sayfa</Link>
             <Link href="/pricing" className="hover:text-blue-400 transition">Fiyatlandırma</Link>
-            <Link href="#" className="hover:text-blue-400 transition">Destek</Link>
-            <Link href="#" className="hover:text-blue-400 transition">Gizlilik</Link>
+            <Link href="/contact" className="hover:text-blue-400 transition">İletişim</Link>
+            <Link href="/about" className="hover:text-blue-400 transition">Hakkımızda</Link>
           </div>
         </div>
       </footer>

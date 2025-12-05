@@ -54,14 +54,16 @@ export default function ProfilePage() {
   // Plan bazında kredi limitleri
   const getPlanLimits = (plan?: string) => {
     switch(plan) {
-      case 'starter':
-        return { credits: 50000, name: 'Başlangıç' };
-      case 'popular':
-        return { credits: 200000, name: 'Popüler' };
-      case 'enterprise':
-        return { credits: 500000, name: 'Kurumsal' };
+      case 'baslangic':
+        return { credits: 30000, name: 'Başlangıç' };
+      case 'icerik':
+        return { credits: 100000, name: 'İçerik Üreticisi' };
+      case 'profesyonel':
+        return { credits: 250000, name: 'Profesyonel' };
+      case 'kurumsal':
+        return { credits: 2000000, name: 'Kurumsal' };
       default:
-        return { credits: 500, name: 'Ücretsiz' };
+        return { credits: 1000, name: 'Ücretsiz' };
     }
   };
 
@@ -156,14 +158,14 @@ export default function ProfilePage() {
           <div className="mb-4">
             <div className="flex justify-between items-end mb-2">
               <span className="text-2xl font-bold text-gray-900">
-                {userData?.credits || 500}
+                {userData?.credits || 1000}
               </span>
               <span className="text-sm text-gray-500">/ {maxCredits}</span>
             </div>
             <div className="w-full bg-gray-100 h-3 rounded-full overflow-hidden">
               <div
                 className="bg-gradient-to-r from-cyan-400 to-blue-500 h-full rounded-full transition-all duration-300"
-                style={{ width: `${((userData?.credits || 500) / maxCredits) * 100}%` }}
+                style={{ width: `${((userData?.credits || 1000) / maxCredits) * 100}%` }}
               ></div>
             </div>
           </div>
@@ -202,8 +204,8 @@ export default function ProfilePage() {
           <div className="flex items-center">
             <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
             <span className="text-gray-700">
-              {maxCredits >= 50000 
-                ? `${(maxCredits/1000).toLocaleString('tr-TR')}K kredi/ay` 
+              {maxCredits >= 100000
+                ? `${(maxCredits/1000).toLocaleString('tr-TR')}K karakter/ay`
                 : `Günlük ${maxCredits} karakter`
               }
             </span>
@@ -243,9 +245,10 @@ export default function ProfilePage() {
               <div className="flex items-center">
                 <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
                 <span className="text-gray-700">
-                  {userData?.plan === 'starter' && 'API erişimi yok'}
-                  {userData?.plan === 'popular' && 'API erişimi'}
-                  {userData?.plan === 'enterprise' && 'Özel API limitleri'}
+                  {userData?.plan === 'baslangic' && 'API erişimi yok'}
+                  {userData?.plan === 'icerik' && 'API erişimi'}
+                  {userData?.plan === 'profesyonel' && 'Gelişmiş API erişimi'}
+                  {userData?.plan === 'kurumsal' && 'Özel API limitleri'}
                 </span>
               </div>
             </>
@@ -262,12 +265,12 @@ export default function ProfilePage() {
             Daha fazla karakter, özel sesler ve gelişmiş özellikler için premium plana geçin
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-white rounded-lg p-4 border border-gray-200">
               <Zap className="w-8 h-8 text-blue-500 mb-2" />
               <h4 className="font-semibold text-gray-900">Başlangıç</h4>
-              <p className="text-2xl font-bold text-gray-900 my-2">₺99<span className="text-sm text-gray-500">/ay</span></p>
-              <p className="text-sm text-gray-600">50.000 kredi/ay</p>
+              <p className="text-2xl font-bold text-gray-900 my-2">₺89<span className="text-sm text-gray-500">/ay</span></p>
+              <p className="text-sm text-gray-600">30K karakter/ay</p>
             </div>
             
             <div className="bg-white rounded-lg p-4 border border-cyan-300 relative">
@@ -275,16 +278,23 @@ export default function ProfilePage() {
                 <span className="bg-cyan-500 text-white px-3 py-1 rounded-full text-xs font-medium">Popüler</span>
               </div>
               <Crown className="w-8 h-8 text-purple-500 mb-2" />
-              <h4 className="font-semibold text-gray-900">Popüler</h4>
-              <p className="text-2xl font-bold text-gray-900 my-2">₺299<span className="text-sm text-gray-500">/ay</span></p>
-              <p className="text-sm text-gray-600">200.000 kredi/ay</p>
+              <h4 className="font-semibold text-gray-900">İçerik Üreticisi</h4>
+              <p className="text-2xl font-bold text-gray-900 my-2">₺199<span className="text-sm text-gray-500">/ay</span></p>
+              <p className="text-sm text-gray-600">100K karakter/ay</p>
             </div>
             
             <div className="bg-white rounded-lg p-4 border border-gray-200">
               <Settings className="w-8 h-8 text-orange-500 mb-2" />
+              <h4 className="font-semibold text-gray-900">Profesyonel</h4>
+              <p className="text-2xl font-bold text-gray-900 my-2">₺399<span className="text-sm text-gray-500">/ay</span></p>
+              <p className="text-sm text-gray-600">250K karakter/ay</p>
+            </div>
+
+            <div className="bg-white rounded-lg p-4 border border-gray-200">
+              <Crown className="w-8 h-8 text-yellow-500 mb-2" />
               <h4 className="font-semibold text-gray-900">Kurumsal</h4>
-              <p className="text-2xl font-bold text-gray-900 my-2">₺599<span className="text-sm text-gray-500">/ay</span></p>
-              <p className="text-sm text-gray-600">500.000 kredi/ay</p>
+              <p className="text-2xl font-bold text-gray-900 my-2">₺2,999<span className="text-sm text-gray-500">/ay</span></p>
+              <p className="text-sm text-gray-600">2M karakter/ay</p>
             </div>
           </div>
           

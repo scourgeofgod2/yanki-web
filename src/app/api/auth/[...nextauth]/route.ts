@@ -50,12 +50,31 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: 'jwt'
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id;
         token.credits = (user as any).credits;
         token.plan = (user as any).plan;
       }
+      
+      // Her JWT token yenilendiğinde kullanıcı bilgilerini veritabanından al
+      if (token.id && (trigger === 'update' || !token.plan)) {
+        try {
+          const freshUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { credits: true, plan: true, name: true }
+          });
+          
+          if (freshUser) {
+            token.credits = freshUser.credits;
+            token.plan = freshUser.plan;
+            token.name = freshUser.name;
+          }
+        } catch (error) {
+          console.error('JWT refresh error:', error);
+        }
+      }
+      
       return token;
     },
     async session({ session, token }) {
@@ -68,7 +87,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }
   },
   pages: {
-    signIn: '/login'
+    signIn: '/login',
+    signOut: '/auth/signout'
   }
 });
 

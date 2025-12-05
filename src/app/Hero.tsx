@@ -4,64 +4,26 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { 
-  ArrowRight, Play, Mic, Volume2, Pause, Loader2, 
-  CheckCircle2, Mail, Sparkles, Users, Clock, Award, Globe
+import {
+  ArrowRight, Play, Mic, Volume2, Pause, Loader2,
+  FileText, Users, Video, Languages, Download, ChevronDown,
+  Crown, Zap, TrendingUp, RefreshCw, CheckCircle, AlertCircle
 } from 'lucide-react';
 import axios from 'axios';
+import Navbar from '@/components/Navbar';
 
-// DEMO SESLERİ - API'de geçerli olan voice ID'leriyle
+// DEMO VOICES
 const DEMO_VOICES = [
   {
     id: "English_Trustworth_Man",
-    name: "Mert",
-    type: "Belgesel",
-    color: "bg-blue-500",
-    text: "Yapay zeka ile ses teknolojisinin geleceği burada.",
-    demoFile: "1.mp3",
-    avatarLabel: "MB",
-    desc: "Erkek Belgesel Sesi"
+    name: "Erkek Ses",
+    demoFile: "1.mp3"
   },
   {
-    id: "English_Graceful_Lady",
-    name: "Emel",
-    type: "Podcast",
-    color: "bg-purple-500",
-    text: "Merhaba! Bu teknoloji gerçekten büyüleyici.",
-    demoFile: "2.mp3",
-    avatarLabel: "EM",
-    desc: "Kadın Podcast Sesi"
-  },
-  {
-    id: "English_CaptivatingStoryteller",
-    name: "Aslı",
-    type: "Reklam",
-    color: "bg-pink-500",
-    text: "Hayal ettiğiniz her sesi artık oluşturabilirsiniz!",
-    demoFile: "3.mp3",
-    avatarLabel: "AY",
-    desc: "Kadın Reklam Sesi"
-  },
-  {
-    id: "English_Persuasive_Man",
-    name: "Mehmet",
-    type: "Çizgi Film",
-    color: "bg-green-500",
-    text: "Çocuklar için eğlenceli hikayeler anlatıyorum!",
-    demoFile: "4.mp3",
-    avatarLabel: "MÇ",
-    desc: "Erkek Çizgi Film Sesi"
+    id: "English_Graceful_Lady", 
+    name: "Kadın Ses",
+    demoFile: "2.mp3"
   }
-];
-
-// TÜRK FİRMALARI
-const TURKISH_COMPANIES = [
-  { name: "Turkcell", logo: "TC" },
-  { name: "İş Bankası", logo: "İB" },
-  { name: "TRT", logo: "TRT" },
-  { name: "Akbank", logo: "AB" },
-  { name: "Migros", logo: "MG" },
-  { name: "Hürriyet", logo: "HR" }
 ];
 
 // Navigation Authentication
@@ -93,24 +55,468 @@ function AuthButtons() {
   return (
     <div className="flex items-center gap-4 text-sm">
       <Link href="/login" className="font-medium text-gray-600 hover:text-gray-900 transition">
-        Sign In
+        Giriş Yap
       </Link>
       <Link href="/register" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-        Try now - for free
+        Ücretsiz Dene
       </Link>
     </div>
   );
 }
 
-// Email CTA Component - Copychat Style
-function EmailCTA() {
-  const [email, setEmail] = useState('');
+// Demo Content for Different Tabs
+const DEMO_CONTENT = {
+  'SESLENDIRME': {
+    title: 'Metni Sese Dönüştürün',
+    description: 'Aşağıdaki metni seçtiğiniz sesle dinleyin',
+    text: 'Merhaba! Yankı ile metinlerinizi saniyeler içinde doğal seslere dönüştürebilirsiniz. Bu örnek demo ses dosyasıdır.',
+    audioFile: '/audio/demo-tts.mp3',
+    showTextarea: true,
+    categories: [
+      { name: 'Bir hikaye anlat', audio: '/audio/demo_tts_1.mp3', text: 'Bir varmış, bir yokmuş. Eski zamanlarda, büyülü bir ormanda yaşayan küçük bir kız varmış...' },
+      { name: 'Haberler', audio: '/audio/demo_tts_2.mp3', text: 'Bugün açıklanan son gelişmelere göre, yapay zeka teknolojileri günlük yaşamımızda giderek daha fazla yer almaya devam ediyor...' },
+      { name: 'Podcast', audio: '/audio/demo_tts_3.mp3', text: 'Merhaba dinleyiciler! Bugünkü bölümümüzde ses teknolojilerinin geleceğini konuşacağız...' },
+      { name: 'Eğitici', audio: '/audio/demo_tts_4.mp3', text: 'Bu derste, yapay zeka destekli ses üretiminin temel prensiplerini öğreneceğiz...' },
+      { name: 'Reklam', audio: '/audio/demo_tts_5.mp3', text: 'Yeni ürünümüzle tanışın! Hayatınızı kolaylaştıracak bu muhteşem çözüm...' },
+      { name: 'Belgesel', audio: '/audio/demo_tts_6.mp3', text: 'Doğanın derinliklerinde, binlerce yıllık sırları barındıran eski ormanlar...' },
+      { name: 'Çizgi Film', audio: '/audio/demo_tts_7.mp3', text: 'Selam çocuklar! Bugün çok eğlenceli bir maceraya çıkıyoruz!' }
+    ]
+  },
+  'DEŞIFRE': {
+    title: 'Sesi Metne Dönüştürün',
+    description: 'Ses dosyasını oynatın ve otomatik çıkarılan metni görün',
+    text: 'Bu örnekte, ses dosyası otomatik olarak metne dönüştürülmüştür:\n\n"Yapay zeka teknolojisi sayesinde ses kayıtlarınızı hızlı ve doğru şekilde metne çevirebiliriz. Bu işlem sadece birkaç saniye sürmektedir."',
+    audioFile: '/audio/demo-stt.mp3',
+    showTextarea: false,
+    readonly: true,
+    categories: ['Toplantı Kayıtları', 'Röportajlar', 'Podcast Transkriptleri', 'Sesli Notlar']
+  },
+  'SES KLONLAMA': {
+    title: 'Ses Klonlama Demonstrasyonu',
+    description: 'Kaynak sesi dinleyin, ardından klonlanmış versiyonu karşılaştırın',
+    text: 'KAYNAK SES: Orijinal konuşmacının sesi\n\nMETİN: "Bu benim orijinal sesim. Şimdi bu ses klonlanacak."\n\n↓ KLONLANMIŞ SES ↓\n\nAynı metin, klonlanmış sesle: "Bu benim orijinal sesim. Şimdi bu ses klonlanacak."',
+    audioFile: '/audio/demo-clone.mp3',
+    sourceAudio: '/audio/demo-source.mp3',
+    showTextarea: false,
+    readonly: true,
+    categories: ['Kaynak Ses', 'Klonlanmış Ses']
+  }
+};
+
+// User Dashboard Card Component
+function UserDashboardCard() {
+  const { data: session, status, update } = useSession();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const router = useRouter();
+
+  // Session refresh fonksiyonu
+  const refreshUserData = async () => {
+    setIsRefreshing(true);
+    try {
+      await update(); // NextAuth session'ı güncelle
+      // Alternatif: Manuel API çağrısı yapabilirsiniz
+      // const response = await fetch('/api/auth/refresh-session', { method: 'POST' });
+      // const data = await response.json();
+    } catch (error) {
+      console.error('Session refresh error:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  if (status === 'loading') {
+    return (
+      <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-6 border border-blue-200">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-gray-200 animate-pulse rounded-full"></div>
+          <div className="flex-1">
+            <div className="h-6 bg-gray-200 animate-pulse rounded mb-2"></div>
+            <div className="h-4 bg-gray-200 animate-pulse rounded w-2/3"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return null;
+  }
+
+  const userPlan = session.user?.plan || 'free';
+  const userCredits = session.user?.credits || 0;
+  const userName = session.user?.name || 'Değerli üyemiz';
+
+  // Plan bilgileri ve limitler
+  const planLimits = {
+    kurumsal: { limit: 500000, name: 'Kurumsal', color: 'from-purple-500 to-pink-500', icon: Crown },
+    profesyonel: { limit: 200000, name: 'Profesyonel', color: 'from-blue-500 to-cyan-500', icon: Zap },
+    icerik: { limit: 100000, name: 'İçerik Üreticisi', color: 'from-green-500 to-teal-500', icon: TrendingUp },
+    baslangic: { limit: 50000, name: 'Başlangıç', color: 'from-orange-500 to-red-500', icon: CheckCircle },
+    free: { limit: 500, name: 'Ücretsiz', color: 'from-gray-500 to-slate-500', icon: AlertCircle }
+  };
+
+  const currentPlan = planLimits[userPlan as keyof typeof planLimits] || planLimits.free;
+  const usagePercentage = Math.min((userCredits / currentPlan.limit) * 100, 100);
+  const Icon = currentPlan.icon;
+
+  const getUpgradeRecommendation = () => {
+    if (userPlan === 'kurumsal') return null;
+    if (userPlan === 'profesyonel') return { plan: 'kurumsal', price: '249₺/ay' };
+    if (userPlan === 'icerik') return { plan: 'profesyonel', price: '149₺/ay' };
+    if (userPlan === 'baslangic') return { plan: 'icerik', price: '119₺/ay' };
+    return { plan: 'baslangic', price: '89₺/ay' };
+  };
+
+  const upgradeRec = getUpgradeRecommendation();
+
+  return (
+    <div className="bg-white rounded-2xl p-6 shadow-xl border border-gray-100">
+      {/* Header with refresh button */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className={`w-12 h-12 rounded-full bg-gradient-to-r ${currentPlan.color} flex items-center justify-center`}>
+            <Icon className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900">
+              Merhaba {userName}! 👋
+            </h3>
+            <p className="text-sm text-gray-600">{currentPlan.name} Paketi</p>
+          </div>
+        </div>
+        <button
+          onClick={refreshUserData}
+          disabled={isRefreshing}
+          className="p-2 hover:bg-gray-100 rounded-full transition"
+          title="Bilgileri Yenile"
+        >
+          <RefreshCw className={`w-4 h-4 text-gray-500 ${isRefreshing ? 'animate-spin' : ''}`} />
+        </button>
+      </div>
+
+      {/* Credits and Progress */}
+      <div className="mb-4">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-medium text-gray-700">Kredi Durumu</span>
+          <span className="text-sm text-gray-600">
+            {userCredits.toLocaleString('tr-TR')} / {currentPlan.limit.toLocaleString('tr-TR')}
+          </span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-3">
+          <div
+            className={`h-3 rounded-full bg-gradient-to-r ${currentPlan.color} transition-all duration-300`}
+            style={{ width: `${usagePercentage}%` }}
+          />
+        </div>
+        <div className="text-xs text-gray-500 mt-1">
+          %{usagePercentage.toFixed(1)} kullanıldı
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <button
+          onClick={() => router.push('/dashboard')}
+          className="flex items-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+        >
+          <Mic className="w-4 h-4" />
+          Ses Üret
+        </button>
+        <button
+          onClick={() => router.push('/dashboard/studio')}
+          className="flex items-center gap-2 px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition font-medium"
+        >
+          <Volume2 className="w-4 h-4" />
+          Stüdyo
+        </button>
+      </div>
+
+      {/* Upgrade Suggestion */}
+      {upgradeRec && (userCredits < currentPlan.limit * 0.2) && (
+        <div className="p-4 bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-lg">
+          <div className="flex items-start gap-3">
+            <TrendingUp className="w-5 h-5 text-orange-600 mt-0.5" />
+            <div className="flex-1">
+              <h4 className="font-semibold text-orange-900 text-sm mb-1">
+                Paket Yükseltme Önerisi
+              </h4>
+              <p className="text-orange-700 text-xs mb-3">
+                Kredileriniz azalıyor. Daha büyük projeler için {planLimits[upgradeRec.plan as keyof typeof planLimits]?.name} paketini deneyin.
+              </p>
+              <button
+                onClick={() => router.push('/pricing')}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-orange-600 text-white text-xs font-medium rounded-lg hover:bg-orange-700 transition"
+              >
+                <Crown className="w-3 h-3" />
+                {upgradeRec.price} - Yükselt
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Voiser Style Demo Component
+function VoiserStyleDemo() {
+  const [activeTab, setActiveTab] = useState('SESLENDIRME');
+  const [selectedVoice, setSelectedVoice] = useState(DEMO_VOICES[0]);
+  const [customText, setCustomText] = useState(DEMO_CONTENT['SESLENDIRME'].text);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentAudio, setCurrentAudio] = useState<'main' | 'source' | null>(null);
+  const [showMembershipPrompt, setShowMembershipPrompt] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const sourceAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const tabs = [
+    { id: 'SESLENDIRME', name: 'SESLENDIRME', icon: Volume2, active: true },
+    { id: 'DEŞIFRE', name: 'DEŞIFRE', icon: FileText, active: true },
+    { id: 'SES KLONLAMA', name: 'SES KLONLAMA', icon: Users, active: true },
+    { id: 'AI VIDEO', name: 'AI VIDEO', icon: Video, active: false },
+    { id: 'AI DUBLAJ', name: 'AI DUBLAJ', icon: Languages, active: false },
+    { id: 'UYGULAMALAR', name: 'UYGULAMALAR', icon: Mic, active: false }
+  ];
+
+  // Tab değiştiğinde içeriği güncelle
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+    const content = DEMO_CONTENT[tabId as keyof typeof DEMO_CONTENT];
+    if (content) {
+      setCustomText(content.text);
+      setShowMembershipPrompt(false);
+      setIsPlaying(false);
+      setCurrentAudio(null);
+    }
+  };
+
+  const handleDemoPlay = () => {
+    const content = DEMO_CONTENT[activeTab as keyof typeof DEMO_CONTENT];
+    if (!content) return;
+
+    // Demo oynatıldıktan sonra üyelik teşviki göster
+    setShowMembershipPrompt(true);
+    
+    if (audioRef.current) {
+      audioRef.current.src = content.audioFile;
+      audioRef.current.play().then(() => {
+        setIsPlaying(true);
+        setCurrentAudio('main');
+      }).catch(e => console.error("Oynatma hatası:", e));
+    }
+  };
+
+  const handleSourcePlay = () => {
+    if (sourceAudioRef.current && DEMO_CONTENT['SES KLONLAMA'].sourceAudio) {
+      sourceAudioRef.current.src = DEMO_CONTENT['SES KLONLAMA'].sourceAudio;
+      sourceAudioRef.current.play().then(() => {
+        setIsPlaying(true);
+        setCurrentAudio('source');
+      }).catch(e => console.error("Kaynak ses oynatma hatası:", e));
+    }
+  };
+
+  const togglePlay = () => {
+    if (currentAudio === 'main' && audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play().catch(e => console.error("Oynatma hatası:", e));
+      }
+    } else if (currentAudio === 'source' && sourceAudioRef.current) {
+      if (isPlaying) {
+        sourceAudioRef.current.pause();
+      } else {
+        sourceAudioRef.current.play().catch(e => console.error("Oynatma hatası:", e));
+      }
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  return (
+    <div className="bg-gray-50 rounded-3xl border border-gray-200">
+      {/* Content */}
+      <div className="p-8">
+        {/* Feature Tabs */}
+        <div className="flex flex-wrap justify-center gap-3 mb-8">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => handleTabChange(tab.id)}
+                disabled={!tab.active}
+                className={`flex items-center gap-2 px-4 py-3 rounded-full text-sm font-medium transition ${
+                  activeTab === tab.id
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : tab.active
+                    ? 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                <Icon size={16} />
+                {tab.name}
+                {!tab.active && <span className="text-xs opacity-75">Yakında</span>}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Main Demo Area */}
+        <div className="bg-white rounded-2xl p-6 shadow-xl">
+          <textarea
+            value={customText}
+            onChange={(e) => setCustomText(e.target.value)}
+            placeholder="Metninizi buraya yazın..."
+            className="w-full h-48 p-4 border border-gray-200 rounded-xl text-gray-700 text-base leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif' }}
+          />
+          
+          {/* Dynamic Content based on active tab */}
+          {activeTab === 'SESLENDIRME' && (
+            <>
+              {/* Voice Selection */}
+              <div className="mt-6 mb-6">
+                <h4 className="font-semibold text-gray-900 mb-3">🎵 7 Farklı Ses Seçeneği</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {DEMO_CONTENT.SESLENDIRME.categories.map((category, index) => (
+                    <button
+                      key={category.name}
+                      onClick={() => {
+                        setCustomText(category.text);
+                        // Audio ref'i güncelle
+                        if (audioRef.current) {
+                          audioRef.current.src = category.audio;
+                        }
+                      }}
+                      className="px-3 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm hover:bg-blue-50 hover:border-blue-300 transition"
+                    >
+                      <div className="font-medium">{category.name}</div>
+                      <div className="text-xs text-gray-500">Ses {index + 1}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
+          {activeTab === 'SES KLONLAMA' && (
+            <div className="mt-6 mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <h4 className="font-semibold text-gray-900 mb-3">🎯 Demo: Ses Klonlama Süreci</h4>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleSourcePlay}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition"
+                  >
+                    <Play size={16} />
+                    1. Kaynak Sesi Dinle
+                  </button>
+                  <span className="text-sm text-gray-600">Orijinal konuşmacının sesi</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleDemoPlay}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition"
+                  >
+                    <Play size={16} />
+                    2. Klonlanmış Sesi Dinle
+                  </button>
+                  <span className="text-sm text-gray-600">AI ile klonlanmış versiyon</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Controls */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              {/* Language Dropdown */}
+              <div className="flex items-center gap-2 bg-white border border-gray-300 px-3 py-2 rounded-lg">
+                <div className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center">
+                  <span className="text-white text-xs">🇹🇷</span>
+                </div>
+                <span className="text-sm font-medium text-gray-700">Türkçe</span>
+                <ChevronDown size={16} className="text-gray-500" />
+              </div>
+            </div>
+
+            {/* Play Button + Download */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleDemoPlay}
+                className="flex items-center gap-3 px-8 py-3 bg-blue-600 text-white rounded-lg font-medium text-base hover:bg-blue-700 transition shadow-lg"
+              >
+                {isPlaying && currentAudio === 'main' ? <Pause size={20} /> : <Play size={20} />}
+                <span>
+                  {isPlaying && currentAudio === 'main' ? 'Duraklat' : 'OYNAT'}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* Membership Prompt */}
+          {showMembershipPrompt && (
+            <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-2xl">✨</span>
+                <h4 className="font-semibold text-gray-900">
+                  Daha Fazlası İçin Üye Olun!
+                </h4>
+              </div>
+              <p className="text-gray-600 text-sm mb-3">
+                Sınırsız ses üretimi, ses klonlama ve tüm premium özellikler için hemen kayıt olun.
+              </p>
+              <div className="flex items-center gap-3">
+                <Link href="/register" className="px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition">
+                  Ücretsiz Dene
+                </Link>
+                <Link href="/pricing" className="px-4 py-2 text-purple-600 text-sm font-medium hover:text-purple-800 transition">
+                  Paketleri Gör
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Hidden Audio Elements */}
+      <audio
+        ref={audioRef}
+        onEnded={() => {
+          setIsPlaying(false);
+          setCurrentAudio(null);
+        }}
+        onPlay={() => {
+          setIsPlaying(true);
+        }}
+        onPause={() => {
+          setIsPlaying(false);
+        }}
+      />
+      
+      <audio
+        ref={sourceAudioRef}
+        onEnded={() => {
+          setIsPlaying(false);
+          setCurrentAudio(null);
+        }}
+        onPlay={() => {
+          setIsPlaying(true);
+        }}
+        onPause={() => {
+          setIsPlaying(false);
+        }}
+      />
+    </div>
+  );
+}
+
+const Hero = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleGetStarted = () => {
     if (session) {
       router.push('/dashboard');
     } else {
@@ -118,555 +524,97 @@ function EmailCTA() {
     }
   };
 
-  if (status === 'loading') {
-    return (
-      <div className="flex w-full max-w-md">
-        <div className="flex-1 h-12 bg-gray-200 animate-pulse rounded-l-xl"></div>
-        <div className="w-32 h-12 bg-gray-300 animate-pulse rounded-r-xl"></div>
-      </div>
-    );
-  }
-
-  // Giriş yapmış kullanıcı için özel görünüm
-  if (session) {
-    const userName = session.user?.name || session.user?.email?.split('@')[0] || 'Kullanıcı';
-    return (
-      <div className="w-full max-w-md">
-        <div className="mb-4">
-          <h3 className="text-2xl font-bold text-gray-900">
-            Hoşgeldin, <span className="text-blue-600">{userName}</span>! 👋
-          </h3>
-          <p className="text-gray-600 mt-1">Ses üretmeye hazır mısın?</p>
-        </div>
-        <Link href="/dashboard">
-          <button className="w-full px-6 py-4 bg-gray-900 text-white font-medium rounded-xl hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">
-            Panele Git
-            <ArrowRight size={18} />
-          </button>
-        </Link>
-      </div>
-    );
-  }
-
-  // Giriş yapmamış kullanıcı için email form
-  return (
-    <form onSubmit={handleSubmit} className="flex w-full max-w-md">
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email adresinizi girin"
-        className="flex-1 px-4 py-3 text-sm border border-gray-300 rounded-l-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-        required
-      />
-      <button
-        type="submit"
-        className="px-6 py-3 bg-gray-900 text-white text-sm font-medium rounded-r-xl hover:bg-gray-800 transition-colors flex items-center gap-2"
-      >
-        Başlayın
-        <ArrowRight size={16} />
-      </button>
-    </form>
-  );
-}
-
-// Demo Audio Player - Original System with Demo Voices + Custom Text
-function DemoPlayer() {
-  const [activeTab, setActiveTab] = useState<'demo' | 'custom'>('demo');
-  const [selectedVoice, setSelectedVoice] = useState(DEMO_VOICES[0]);
-  const [customText, setCustomText] = useState('');
-  const [selectedEmotion, setSelectedEmotion] = useState('happy');
-  const [selectedLanguage, setSelectedLanguage] = useState('Turkish');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const MAX_CHARS = 100;
-  const remainingChars = MAX_CHARS - customText.length;
-
-  const emotions = [
-    { value: 'happy', label: '😊 Mutlu' },
-    { value: 'sad', label: '😢 Üzgün' },
-    { value: 'neutral', label: '😐 Nötr' },
-    { value: 'angry', label: '😠 Kızgın' }
-  ];
-
-  const languages = [
-    { value: 'Turkish', label: '🇹🇷 Türkçe' },
-    { value: 'English', label: '🇺🇸 English' }
-  ];
-
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const text = e.target.value;
-    if (text.length <= MAX_CHARS) {
-      setCustomText(text);
-    }
-  };
-
-  const handleVoiceSelect = (voice: typeof DEMO_VOICES[0]) => {
-    setSelectedVoice(voice);
-    if (activeTab === 'demo') {
-      // Demo tabında hazır ses çal
-      setAudioUrl(`/audio/${voice.demoFile}`);
-      setIsPlaying(false);
-    }
-  };
-
-  const handleGenerate = async () => {
-    if (activeTab === 'demo') {
-      // Demo sesi çal
-      if (audioUrl && audioRef.current) {
-        togglePlay();
-      }
-      return;
-    }
-
-    // Custom text için TTS API çağrısı
-    const textToUse = customText.trim();
-    if (!textToUse) return;
-
-    setIsGenerating(true);
-    try {
-      const response = await axios.post('/api/tts', {
-        text: textToUse,
-        voiceId: selectedVoice.id,
-        emotion: selectedEmotion,
-        language: selectedLanguage,
-        model: 'speech-2.6-turbo' // Turbo model for demo
-      });
-
-      if (response.data.success) {
-        const newAudioUrl = response.data.audioUrl || response.data.output;
-        setAudioUrl(newAudioUrl);
-        
-        // Cevap gelir gelmez otomatik ses çalma
-        setTimeout(() => {
-          if (audioRef.current && newAudioUrl) {
-            audioRef.current.play().then(() => {
-              setIsPlaying(true);
-            }).catch(e => console.error("Otomatik oynatma hatası:", e));
-          }
-        }, 100);
-      } else {
-        console.error('TTS Error:', response.data.error);
-        alert(response.data.error || 'Ses üretimi başarısız oldu');
-      }
-    } catch (error: any) {
-      console.error('TTS API Error:', error);
-      if (error.response?.status === 401) {
-        alert('Ses üretmek için giriş yapmanız gerekiyor');
-      } else if (error.response?.status === 402) {
-        alert('Yetersiz kredi. Lütfen kredi satın alın.');
-      } else {
-        alert('Ses üretimi başarısız oldu. Lütfen tekrar deneyin.');
-      }
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const togglePlay = () => {
-    if (!audioRef.current || !audioUrl) return;
-    
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play().catch(e => console.error("Oynatma hatası:", e));
-    }
-    setIsPlaying(!isPlaying);
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Tab Selection */}
-      <div className="flex bg-gray-100 rounded-lg p-1">
-        <button
-          onClick={() => setActiveTab('demo')}
-          className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition ${
-            activeTab === 'demo'
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-600 hover:text-gray-900'
-          }`}
-        >
-          🎵 Demo Sesler
-        </button>
-        <button
-          onClick={() => setActiveTab('custom')}
-          className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition ${
-            activeTab === 'custom'
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-600 hover:text-gray-900'
-          }`}
-        >
-          ✏️ Özel Metin
-        </button>
-      </div>
-
-      {/* Demo Voices Tab */}
-      {activeTab === 'demo' && (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-6">
-          {/* Ready Voices Section */}
-          <div>
-            <h4 className="font-semibold text-gray-900 mb-4">HAZIR SESLER</h4>
-            <div className="space-y-3">
-              {DEMO_VOICES.map((voice) => (
-                <div
-                  key={voice.id}
-                  onClick={() => handleVoiceSelect(voice)}
-                  className={`flex items-center gap-4 p-3 rounded-lg border cursor-pointer transition ${
-                    selectedVoice.id === voice.id
-                      ? 'border-blue-300 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  <div className={`w-10 h-10 ${voice.color} rounded-full flex items-center justify-center text-white font-bold text-sm`}>
-                    {voice.avatarLabel}
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium text-gray-900">{voice.name}</div>
-                    <div className="text-sm text-gray-500">{voice.desc}</div>
-                  </div>
-                  {selectedVoice.id === voice.id && (
-                    <CheckCircle2 size={20} className="text-blue-600" />
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Play Button */}
-          <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-            <div className="text-sm text-gray-600">
-              <strong>Seçili:</strong> {selectedVoice.name}
-            </div>
-            <div className="flex items-center gap-3">
-              {audioUrl && (
-                <button
-                  onClick={togglePlay}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition"
-                >
-                  {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-                  <span className="text-sm font-medium">
-                    {isPlaying ? 'Duraklat' : 'Dinle'}
-                  </span>
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Custom Text Tab */}
-      {activeTab === 'custom' && (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-6">
-          {/* Text Input */}
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <h4 className="font-semibold text-gray-900">ÖZEL METNİNİZ</h4>
-              <span className={`text-sm font-mono ${
-                remainingChars < 10 ? 'text-red-500' : 'text-gray-500'
-              }`}>
-                {customText.length}/{MAX_CHARS}
-              </span>
-            </div>
-            <textarea
-              value={customText}
-              onChange={handleTextChange}
-              placeholder="Buraya seslendirmek istediğiniz metni yazın..."
-              className="w-full h-24 p-3 bg-white border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-500 resize-none focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent overflow-auto"
-              style={{ minHeight: '96px', maxHeight: '96px', whiteSpace: 'pre-wrap' }}
-            />
-          </div>
-
-          {/* Voice Selection */}
-          <div>
-            <h4 className="font-semibold text-gray-900 mb-3">HAZIR SESLER</h4>
-            <div className="flex gap-2 flex-wrap">
-              {DEMO_VOICES.map((voice) => (
-                <button
-                  key={voice.id}
-                  onClick={() => setSelectedVoice(voice)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition ${
-                    selectedVoice.id === voice.id
-                      ? 'bg-gray-900 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  <div className={`w-6 h-6 ${voice.color} rounded-full flex items-center justify-center text-white text-xs font-bold`}>
-                    {voice.avatarLabel}
-                  </div>
-                  {voice.name}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Emotion & Language */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <h5 className="font-semibold text-gray-900 mb-2">DUYGU TONU</h5>
-              <select
-                value={selectedEmotion}
-                onChange={(e) => setSelectedEmotion(e.target.value)}
-                className="w-full p-2 bg-white text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              >
-                {emotions.map((emotion) => (
-                  <option key={emotion.value} value={emotion.value}>
-                    {emotion.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <h5 className="font-semibold text-gray-900 mb-2">DİL</h5>
-              <select
-                value={selectedLanguage}
-                onChange={(e) => setSelectedLanguage(e.target.value)}
-                className="w-full p-2 bg-white text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              >
-                {languages.map((language) => (
-                  <option key={language.value} value={language.value}>
-                    {language.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Generate Button */}
-          <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-            <button
-              onClick={handleGenerate}
-              disabled={isGenerating || (!customText.trim())}
-              className="flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isGenerating ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (
-                <Mic size={16} />
-              )}
-              <span className="font-medium">
-                {isGenerating ? 'Oluşturuluyor...' : 'Oluştur'}
-              </span>
-            </button>
-
-            {/* Audio Player */}
-            {audioUrl && (
-              <button
-                onClick={togglePlay}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition"
-              >
-                {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-                <span className="text-sm font-medium">
-                  {isPlaying ? 'Duraklat' : 'Dinle'}
-                </span>
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Hidden Audio Element */}
-      {audioUrl && (
-        <audio
-          ref={audioRef}
-          src={audioUrl}
-          onEnded={() => setIsPlaying(false)}
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
-        />
-      )}
-    </div>
-  );
-}
-
-const Hero = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav className="border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-              Y
-            </div>
-            <span className="text-xl font-bold text-gray-900">Yankı</span>
-          </Link>
+      <Navbar />
 
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
-            <a href="#demo" className="hover:text-gray-900 transition">Demo</a>
-            <Link href="/pricing" className="hover:text-gray-900 transition">Fiyatlandırma</Link>
-            <a href="#features" className="hover:text-gray-900 transition">Özellikler</a>
-          </div>
-
-          <AuthButtons />
-        </div>
-      </nav>
-
-      {/* Main Hero Section */}
-      <main className="max-w-7xl mx-auto px-6 py-20">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          
-          {/* Sol Taraf - Content */}
-          <div className="space-y-8">
-            
-            {/* Announcement Badge with Urgency */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-50 border border-red-200 rounded-full text-sm text-red-700">
-              <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-              <span className="font-medium">🔥 Bu ayın son 48 üyeliği • %50 indirim bitiyor!</span>
-            </div>
-
-            {/* Main Headline - Copychat Style */}
-            <div className="space-y-4">
-              <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight tracking-tight">
-                Kolayca saniyeler içinde 
-                <span className="block text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
-                  ses içeriği oluşturun,
-                </span>
-                sihir gibi ✨
-              </h1>
-              
-              <p className="text-xl text-gray-600 leading-relaxed">
-                Metinlerinizi doğal ses dosyalarına dönüştürün, sesinizi klonlayın ve çoklu dilde içerik üretin. 
-                Profesyonel ses stüdyosu artık cebinizde.
-              </p>
-            </div>
-
-            {/* Email CTA */}
-            <div className="space-y-3">
-              <EmailCTA />
-              <p className="text-sm text-gray-500">
-                Kredi kartı gerektirmez • 14 gün ücretsiz deneme
-              </p>
-            </div>
-
-            {/* Enhanced Social Proof */}
-            <div className="space-y-3 pt-4">
-              <div className="flex items-center gap-4">
-                <div className="flex -space-x-2">
-                  {[1,2,3,4,5].map((i) => (
-                    <div key={i} className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full border-2 border-white flex items-center justify-center text-xs text-white font-bold">
-                      {String.fromCharCode(64 + i)}
-                    </div>
-                  ))}
-                  <div className="w-8 h-8 bg-gray-200 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-gray-600">
-                    +12K
-                  </div>
-                </div>
-                <div className="text-sm text-gray-600">
-                  <span className="font-semibold text-gray-900">12,847</span> kullanıcı bu ay katıldı
-                </div>
-              </div>
-              
-              {/* Live Activity Indicator */}
-              <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium text-green-700">ŞU AN CANLI</span>
-                </div>
-                <span className="text-sm text-green-600">
-                  <span className="font-semibold">1,247</span> kullanıcı ses üretiyor
-                </span>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Sağ Taraf - Demo Area */}
-          <div id="demo" className="space-y-6">
-            <div className="text-center lg:text-left">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Canlı Demo
-              </h2>
-              <p className="text-gray-600">
-                Ses teknolojimizi hemen deneyin
-              </p>
-            </div>
-            
-            <DemoPlayer />
-            
-            {/* Feature Highlights */}
-            <div className="grid grid-cols-2 gap-4 pt-4">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <CheckCircle2 size={16} className="text-green-500" />
-                <span>31 Farklı Ses</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <CheckCircle2 size={16} className="text-green-500" />
-                <span>20+ Dil Desteği</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <CheckCircle2 size={16} className="text-green-500" />
-                <span>Ses Klonlama</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <CheckCircle2 size={16} className="text-green-500" />
-                <span>API Erişimi</span>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </main>
-
-      {/* Companies Section */}
-      <section className="border-t border-gray-100 py-12">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-8">
-            <p className="text-sm font-medium text-gray-500 mb-4">
-              Türkiye'nin önde gelen şirketleri Yankı'yı tercih ediyor
-            </p>
+      {/* Hero Content */}
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Top Section */}
+        <div className="text-center py-16">
+          {/* Main Title */}
+          <div className="max-w-6xl mx-auto mb-8">
+            <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
+              Kolayca saniyeler içinde{' '}
+              <span className="text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
+                ses içeriği oluşturun,
+              </span>{' '}
+              sihir gibi ✨
+            </h1>
           </div>
           
-          <div className="flex items-center justify-center gap-12 opacity-60">
-            {TURKISH_COMPANIES.map((company) => (
-              <div key={company.name} className="flex items-center gap-2">
-                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center font-bold text-gray-700 text-sm">
-                  {company.logo}
-                </div>
-                <span className="font-semibold text-gray-700">{company.name}</span>
+          <p className="text-lg text-gray-600 mb-8 max-w-4xl mx-auto leading-relaxed">
+            Metinlerinizi doğal ses dosyalarına dönüştürün, sesinizi klonlayın ve 20+ dilde içerik üretin.
+            Profesyonel ses stüdyosu artık cebinizde.
+          </p>
+
+          {/* User Dashboard Card or CTA */}
+          {session ? (
+            <div className="max-w-lg mx-auto mb-8">
+              <UserDashboardCard />
+            </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+              <button
+                onClick={handleGetStarted}
+                className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition shadow-lg"
+              >
+                Ücretsiz Denemeye Başla
+                <ArrowRight size={18} />
+              </button>
+              <Link
+                href="/pricing"
+                className="inline-flex items-center gap-2 px-6 py-3 text-gray-700 font-medium border-2 border-gray-300 rounded-lg hover:border-gray-400 transition"
+              >
+                Paketleri İncele
+              </Link>
+            </div>
+          )}
+
+          {/* Key Features */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Volume2 className="w-6 h-6 text-blue-600" />
               </div>
-            ))}
+              <h3 className="font-semibold text-gray-900 mb-2">Doğal Sesler</h3>
+              <p className="text-gray-600 text-sm">20+ dilde profesyonel kalitede ses üretimi</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="w-6 h-6 text-purple-600" />
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">Ses Klonlama</h3>
+              <p className="text-gray-600 text-sm">Kendi sesinizi klonlayın ve özelleştirin</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Zap className="w-6 h-6 text-green-600" />
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">Hızlı & Kolay</h3>
+              <p className="text-gray-600 text-sm">Saniyeler içinde profesyonel sonuçlar</p>
+            </div>
           </div>
         </div>
-      </section>
 
-      {/* Stats Section */}
-      <section id="features" className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Güçlü İstatistiklerle Desteklenen Teknoloji
-            </h2>
-            <p className="text-lg text-gray-600">
-              Binlerce kullanıcının tercih ettiği ses teknolojisi
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {[
-              { icon: Users, number: "50K+", label: "Ses Ürettik" },
-              { icon: Globe, number: "20+", label: "Dil ve Aksan" },
-              { icon: Clock, number: "15", label: "Saniyede Üretim" },
-              { icon: Award, number: "99.2%", label: "Kalite Skoru" }
-            ].map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="flex justify-center mb-3">
-                  <stat.icon size={32} className="text-gray-700" />
-                </div>
-                <div className="text-3xl font-bold text-gray-900 mb-1">
-                  {stat.number}
-                </div>
-                <div className="text-sm font-medium text-gray-600">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Demo Section */}
+        <div className="pb-16">
+          <VoiserStyleDemo />
         </div>
-      </section>
 
+        {/* Bottom CTA Section */}
+        {!session && (
+          <div className="text-center pb-16">
+            <button
+              onClick={handleGetStarted}
+              className="px-8 py-4 bg-blue-600 text-white font-semibold text-lg rounded-xl hover:bg-blue-700 transition shadow-lg"
+            >
+              Ücretsiz Denemeye Başla!
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

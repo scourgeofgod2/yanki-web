@@ -90,7 +90,7 @@ export default function DashboardLayout({
   const usagePercentage = maxCredits > 0 ? ((maxCredits - currentCredits) / maxCredits) * 100 : 0;
 
   const handleLogout = async () => {
-    await signOut({ callbackUrl: '/' });
+    window.location.href = '/auth/signout';
   };
 
   useEffect(() => {
