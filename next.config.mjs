@@ -1,31 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 1. Performans ve RAM ayarları
+  // RAM ve Performans Ayarları
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },
   productionBrowserSourceMaps: false,
   
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-    ],
+    remotePatterns: [{ protocol: 'https', hostname: '**' }],
   },
 
-  // 2. cPanel Symlink Hatasını Çözen Kritik Ayar
+  // cPanel Symlink Çözümü (Webpack Modunda Çalışır)
   webpack: (config) => {
     config.resolve.symlinks = false;
     return config;
-  },
-
-  // 3. "Turbopack Conflict" Hatasını Susturan Boş Ayar
-  // Bunu ekleyince Next.js, "Tamam Webpack kullanmaya devam et" der.
-  experimental: {
-    turbo: {
-      rules: {},
-    },
   },
 };
 
