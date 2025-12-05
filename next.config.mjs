@@ -1,18 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // RAM ve Performans Ayarları
-  typescript: { ignoreBuildErrors: true },
-  eslint: { ignoreDuringBuilds: true },
-  productionBrowserSourceMaps: false,
-  
-  images: {
-    remotePatterns: [{ protocol: 'https', hostname: '**' }],
+  typescript: {
+    ignoreBuildErrors: true,
   },
-
-  // cPanel Symlink Çözümü (Webpack Modunda Çalışır)
-  webpack: (config) => {
-    config.resolve.symlinks = false;
-    return config;
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  // RAM tasarrufu sağlar
+  productionBrowserSourceMaps: false, 
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
   },
 };
 
