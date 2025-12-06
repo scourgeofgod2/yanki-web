@@ -1,264 +1,355 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import Link from 'next/link';
-import { useSession } from 'next-auth/react';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import React from 'react';
+import { Users, Target, Zap, Shield, Award, TrendingUp, Heart, Globe } from 'lucide-react';
+// DÜZELTME 1: Dosya isimleri küçük harfle (sunucudaki dosya adıyla birebir aynı olmalı)
+import Navbar from '@/components/navbar';
+// DÜZELTME 2: Footer muhtemelen components klasöründedir, değilse dosya yolunu kontrol et
+import Footer from '@/components/footer'; 
 
-interface NavbarProps {
-  className?: string;
-}
-
-export default function Navbar({ className = '' }: NavbarProps) {
-  const { data: session, status } = useSession();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [productsDropdownOpen, setProductsDropdownOpen] = useState(false);
-  const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const navigation = [
+export default function AboutPage() {
+  const teamMembers = [
     {
-      name: 'Ürünler',
-      href: '#',
-      hasDropdown: true,
-      dropdown: [
-        { name: 'Seslendirme', href: '/products/tts', description: 'Metni ses dosyasına çevirin', icon: '🎤' },
-        { name: 'Ses Klonlama', href: '/products/voice-cloning', description: 'Sesinizi klonlayın ve kullanın', icon: '👥' },
-        { name: 'Deşifre', href: '/products/transcribe', description: 'Ses dosyalarını metne çevirin', icon: '📝' }
-      ]
+      name: 'Ahmet Yılmaz',
+      position: 'Kurucu & CEO',
+      image: '👨‍💼',
+      bio: '15+ yıl teknoloji deneyimi, AI ve ses teknolojileri uzmanı'
     },
-    { name: 'Fiyatlar', href: '/pricing' },
-    { name: 'Blog', href: '/blog' },
-    { name: 'Hakkımızda', href: '/about' },
-    { name: 'İletişim', href: '/contact' }
+    {
+      name: 'Elif Kaya',
+      position: 'CTO',
+      image: '👩‍💻',
+      bio: 'Machine Learning PhD, önceden Google ve Microsoft\'ta çalıştı'
+    },
+    {
+      name: 'Mehmet Demir',
+      position: 'Ses Teknolojileri Uzmanı',
+      image: '🎧',
+      bio: 'Audio engineering background, 10+ yıl broadcast deneyimi'
+    },
+    {
+      name: 'Ayşe Şen',
+      position: 'Product Manager',
+      image: '👩‍🚀',
+      bio: 'UX/UI specialist, kullanıcı deneyimi ve ürün geliştirme uzmanı'
+    }
   ];
 
-  const handleDropdownEnter = () => {
-    if (dropdownTimeoutRef.current) {
-      clearTimeout(dropdownTimeoutRef.current);
-      dropdownTimeoutRef.current = null;
+  const values = [
+    {
+      icon: <Zap className="w-8 h-8" />,
+      title: 'İnovasyon',
+      description: 'Sürekli araştırma ve geliştirme ile ses teknologilerinin sınırlarını zorluyoruz',
+      color: 'text-yellow-600 bg-yellow-100'
+    },
+    {
+      icon: <Shield className="w-8 h-8" />,
+      title: 'Güvenilirlik',
+      description: 'Verilerinizin güvenliği ve gizliliği bizim için en önemli öncelik',
+      color: 'text-green-600 bg-green-100'
+    },
+    {
+      icon: <Heart className="w-8 h-8" />,
+      title: 'Kullanıcı Odaklı',
+      description: 'Her özelliği kullanıcı ihtiyaçları doğrultusunda tasarlıyor ve geliştiriyoruz',
+      color: 'text-red-600 bg-red-100'
+    },
+    {
+      icon: <Globe className="w-8 h-8" />,
+      title: 'Erişilebilirlik',
+      description: 'Ses teknolojilerini herkese ulaştırabilir ve kullanılabilir hale getiriyoruz',
+      color: 'text-blue-600 bg-blue-100'
     }
-    setProductsDropdownOpen(true);
-  };
+  ];
 
-  const handleDropdownLeave = () => {
-    dropdownTimeoutRef.current = setTimeout(() => {
-      setProductsDropdownOpen(false);
-    }, 150); // 150ms delay before closing
-  };
+  const milestones = [
+    {
+      year: '2022',
+      title: 'Yankı\'nın Doğuşu',
+      description: 'Türkiye\'de AI destekli ses teknolojileri alanında öncü olmak vizyonuyla kurulduk'
+    },
+    {
+      year: '2023',
+      title: 'İlk Ürün Lansmanı',
+      description: 'Text-to-Speech teknolojimizi piyasaya sunduk ve 1000+ kullanıcıya ulaştık'
+    },
+    {
+      year: '2024',
+      title: 'Ses Klonlama',
+      description: 'Voice Cloning teknolojisini geliştirdik ve 10,000+ aktif kullanıcıya ulaştık'
+    },
+    {
+      year: '2024',
+      title: 'Kurumsal Çözümler',
+      description: 'B2B segment için özel çözümler geliştirdik ve büyük şirketlerle iş birliği başlattık'
+    }
+  ];
 
-  useEffect(() => {
-    return () => {
-      if (dropdownTimeoutRef.current) {
-        clearTimeout(dropdownTimeoutRef.current);
-      }
-    };
-  }, []);
+  const stats = [
+    { number: '50K+', label: 'Aktif Kullanıcı', icon: <Users className="w-6 h-6" /> },
+    { number: '2M+', label: 'Üretilen Ses Dosyası', icon: <Zap className="w-6 h-6" /> },
+    { number: '150+', label: 'Kurumsal Müşteri', icon: <Award className="w-6 h-6" /> },
+    { number: '99.9%', label: 'Uptime Oranı', icon: <TrendingUp className="w-6 h-6" /> }
+  ];
 
   return (
-    <nav className={`bg-white/95 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-50 ${className}`}>
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex justify-between items-center h-24">
-          {/* Logo - Bigger and more modern */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-11 h-11 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-xl flex items-center justify-center text-white group-hover:scale-105 transition-transform duration-200 shadow-lg shadow-indigo-200">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
-                <path d="M12 2v20"/>
-                <path d="M4.93 10.93a10 10 0 0 1 14.14 0"/>
-              </svg>
-            </div>
-            <span className="text-3xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent font-['Inter']">Yankı</span>
-          </Link>
+    <div className="min-h-screen bg-white font-['Inter',ui-sans-serif,system-ui,-apple-system,sans-serif]">
+      <Navbar />
 
-          {/* Desktop Navigation - Bigger and modern */}
-          <div className="hidden lg:flex items-center gap-10">
-            {navigation.map((item) => (
-              <div key={item.name} className="relative">
-                {item.hasDropdown ? (
-                  <div
-                    className="relative"
-                    onMouseEnter={handleDropdownEnter}
-                    onMouseLeave={handleDropdownLeave}
-                  >
-                    <button className="flex items-center gap-2 text-slate-700 hover:text-indigo-600 font-semibold text-base transition-all duration-200 font-['Inter'] py-2 px-1 rounded-lg hover:bg-indigo-50/50">
-                      {item.name}
-                      <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${productsDropdownOpen ? 'rotate-180' : ''}`} />
-                    </button>
-                    
-                    {/* Invisible bridge to prevent dropdown from closing */}
-                    <div className="absolute top-full left-0 w-full h-2 bg-transparent"></div>
-                    
-                    {productsDropdownOpen && (
-                      <div
-                        className="absolute top-full left-0 mt-2 w-96 bg-white/98 backdrop-blur-lg rounded-2xl shadow-2xl border border-slate-200/60 p-6 z-50 transform transition-all duration-200 origin-top"
-                        onMouseEnter={handleDropdownEnter}
-                        onMouseLeave={handleDropdownLeave}
-                      >
-                        <div className="space-y-4">
-                          {item.dropdown?.map((dropdownItem) => (
-                            <Link
-                              key={dropdownItem.name}
-                              href={dropdownItem.href}
-                              className="flex items-start gap-4 p-4 rounded-xl hover:bg-gradient-to-r hover:from-indigo-50 hover:to-blue-50 transition-all duration-200 group border border-transparent hover:border-indigo-200"
-                              onClick={() => setProductsDropdownOpen(false)}
-                            >
-                              <div className="text-2xl flex-shrink-0">{dropdownItem.icon}</div>
-                              <div>
-                                <div className="font-bold text-slate-900 group-hover:text-indigo-600 mb-1 font-['Inter'] text-lg">
-                                  {dropdownItem.name}
-                                </div>
-                                <div className="text-sm text-slate-600 font-['Inter'] leading-relaxed">
-                                  {dropdownItem.description}
-                                </div>
-                              </div>
-                            </Link>
-                          ))}
-                        </div>
-                        <div className="mt-6 pt-4 border-t border-slate-200">
-                          <p className="text-xs text-slate-500 font-['Inter'] text-center">
-                            Tüm ürünlerimizi keşfedin
-                          </p>
-                        </div>
-                      </div>
-                    )}
+      {/* HERO SECTION */}
+      <section className="pt-20 pb-16 bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6">
+              Ses Teknolojilerinin 
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600"> Geleceğini </span>
+              Şekillendiriyoruz
+            </h1>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Yankı olarak, yapay zeka destekli ses teknolojileri ile içerik üreticilerinin hayallerini 
+              gerçekleştirmelerine yardımcı oluyoruz. Türkiye'den dünyaya açılan teknoloji hikayemiz.
+            </p>
+          </div>
+
+          {/* İSTATİSTİKLER */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+            {stats.map((stat, index) => (
+              <div key={index} className="bg-white rounded-xl border border-gray-200 p-6 text-center hover:shadow-lg transition-shadow">
+                <div className="flex justify-center mb-4">
+                  <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600">
+                    {stat.icon}
                   </div>
-                ) : (
-                  <Link
-                    href={item.href}
-                    className="text-slate-700 hover:text-indigo-600 font-semibold text-base transition-all duration-200 font-['Inter'] py-2 px-3 rounded-lg hover:bg-indigo-50/50"
-                  >
-                    {item.name}
-                  </Link>
-                )}
+                </div>
+                <div className="text-3xl font-bold text-gray-900 mb-2">{stat.number}</div>
+                <div className="text-gray-600">{stat.label}</div>
               </div>
             ))}
           </div>
-
-          {/* Auth Buttons - Desktop - Bigger and modern */}
-          <div className="hidden lg:flex items-center gap-4">
-            {status === 'loading' ? (
-              <>
-                <div className="w-24 h-10 bg-slate-200 animate-pulse rounded-lg"></div>
-                <div className="w-20 h-10 bg-slate-200 animate-pulse rounded-lg"></div>
-              </>
-            ) : session ? (
-              <>
-                <Link href="/dashboard" className="text-base font-semibold text-slate-700 hover:text-indigo-600 transition-all duration-200 font-['Inter'] py-2 px-4 rounded-lg hover:bg-indigo-50/50">
-                  Panel
-                </Link>
-                <Link href="/api/auth/signout" className="bg-gradient-to-r from-slate-900 to-slate-800 text-white text-base font-semibold px-6 py-3 rounded-xl hover:from-slate-800 hover:to-slate-700 transition-all duration-200 font-['Inter'] shadow-lg shadow-slate-300 hover:shadow-xl hover:scale-105">
-                  Çıkış
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link href="/login" className="text-base font-semibold text-slate-700 hover:text-indigo-600 transition-all duration-200 font-['Inter'] py-2 px-4 rounded-lg hover:bg-indigo-50/50">
-                  Giriş Yap
-                </Link>
-                <Link href="/register" className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-base font-semibold px-6 py-3 rounded-xl hover:from-indigo-700 hover:to-blue-700 transition-all duration-200 font-['Inter'] shadow-lg shadow-indigo-300 hover:shadow-xl hover:scale-105">
-                  Kayıt Ol
-                </Link>
-              </>
-            )}
-          </div>
-
-          {/* Mobile Menu Button - Bigger */}
-          <button
-            className="lg:hidden p-3 text-slate-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all duration-200"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
         </div>
+      </section>
 
-        {/* Mobile Menu - Enhanced */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-slate-200 pt-6 pb-8 bg-white/98 backdrop-blur-md">
-            <div className="space-y-6">
-              {/* Products Dropdown - Mobile */}
-              <div>
-                <button
-                  onClick={() => setProductsDropdownOpen(!productsDropdownOpen)}
-                  className="flex items-center justify-between w-full text-slate-700 hover:text-indigo-600 font-semibold text-lg transition-all duration-200 font-['Inter'] p-3 rounded-xl hover:bg-indigo-50/50"
-                >
-                  Ürünler
-                  <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${productsDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
-                {productsDropdownOpen && (
-                  <div className="mt-4 ml-6 space-y-4">
-                    {navigation[0].dropdown?.map((item) => (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        className="flex items-center gap-3 py-3 text-base text-slate-600 hover:text-indigo-600 font-['Inter'] transition-all duration-200 hover:bg-indigo-50/50 rounded-lg px-3"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        <span className="text-xl">{item.icon}</span>
-                        {item.name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
+      {/* HİKAYEMİZ */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-6">Hikayemiz</h2>
+              <div className="prose prose-lg text-gray-700 space-y-4">
+                <p>
+                  2022 yılında, ses teknolojilerinin potansiyelini fark eden bir grup girişimci ve teknolog 
+                  olarak yola çıktık. Amacımız, yapay zeka destekli ses çözümleri ile içerik üretim süreçlerini 
+                  demokratikleştirmekti.
+                </p>
+                <p>
+                  Geleneksel ses prodüksiyon süreçlerinin maliyetli ve zaman alıcı olduğunu gören ekibimiz, 
+                  bu sorunu çözmek için gece gündüz çalıştı. Bugün, binlerce içerik üreticisi Yankı ile 
+                  hayallerini gerçekleştiriyor.
+                </p>
+                <p>
+                  Türkiye'den başlayan bu yolculuk, artık global bir vizyona dönüşmüş durumda. Ses teknolojilerinde 
+                  Türkiye'yi dünya sahnesinde temsil etmenin gururunu yaşıyoruz.
+                </p>
               </div>
-              
-              {/* Other Nav Items - Mobile */}
-              {navigation.slice(1).map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="block text-slate-700 hover:text-indigo-600 font-semibold text-lg transition-all duration-200 font-['Inter'] p-3 rounded-xl hover:bg-indigo-50/50"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
-
-              {/* Auth Buttons - Mobile */}
-              <div className="pt-6 border-t border-slate-200 space-y-4">
-                {status === 'loading' ? (
-                  <>
-                    <div className="w-full h-12 bg-slate-200 animate-pulse rounded-xl"></div>
-                    <div className="w-full h-12 bg-slate-200 animate-pulse rounded-xl"></div>
-                  </>
-                ) : session ? (
-                  <>
-                    <Link
-                      href="/dashboard"
-                      className="block w-full text-center py-4 text-slate-700 hover:text-indigo-600 font-semibold text-lg transition-all duration-200 font-['Inter'] rounded-xl hover:bg-indigo-50/50"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Panel
-                    </Link>
-                    <Link
-                      href="/api/auth/signout"
-                      className="block w-full text-center py-4 bg-gradient-to-r from-slate-900 to-slate-800 text-white font-semibold text-lg rounded-xl hover:from-slate-800 hover:to-slate-700 transition-all duration-200 font-['Inter'] shadow-lg"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Çıkış
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      href="/login"
-                      className="block w-full text-center py-4 text-slate-700 hover:text-indigo-600 font-semibold text-lg transition-all duration-200 font-['Inter'] rounded-xl hover:bg-indigo-50/50"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Giriş Yap
-                    </Link>
-                    <Link
-                      href="/register"
-                      className="block w-full text-center py-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-semibold text-lg rounded-xl hover:from-indigo-700 hover:to-blue-700 transition-all duration-200 font-['Inter'] shadow-lg"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Kayıt Ol
-                    </Link>
-                  </>
-                )}
+            </div>
+            <div className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl p-8 border border-indigo-200">
+              <div className="text-center">
+                <div className="text-6xl mb-6">🚀</div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">2022'den Bugüne</h3>
+                <p className="text-gray-700">
+                  50,000+ kullanıcı, 2 milyon+ üretilen ses dosyası ve sürekli büyüyen ekibimizle 
+                  ses teknolojilerinin öncüsü olmaya devam ediyoruz.
+                </p>
               </div>
             </div>
           </div>
-        )}
-      </div>
-    </nav>
+        </div>
+      </section>
+
+      {/* MİSYON & VİZYON */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Misyonumuz & Vizyonumuz</h2>
+            <p className="text-gray-600">Neden var olduğumuz ve nereye gittiğimiz</p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="bg-white rounded-xl border border-gray-200 p-8 hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 bg-indigo-100 rounded-lg flex items-center justify-center">
+                  <Target className="w-8 h-8 text-indigo-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900">Misyonumuz</h3>
+              </div>
+              <p className="text-gray-700 text-lg leading-relaxed">
+                Yapay zeka destekli ses teknolojileri ile içerik üretim süreçlerini sadeleştirmek, 
+                maliyetleri düşürmek ve kaliteyi artırarak herkesin profesyonel sesli içerikler 
+                üretebilmesini sağlamak.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-xl border border-gray-200 p-8 hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <Globe className="w-8 h-8 text-purple-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900">Vizyonumuz</h3>
+              </div>
+              <p className="text-gray-700 text-lg leading-relaxed">
+                Ses teknolojilerinde dünya çapında tanınan, öncü bir Türk teknoloji şirketi olmak 
+                ve global ölçekte milyonlarca kullanıcının tercih ettiği platform haline gelmek.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* DEĞERLERİMİZ */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Değerlerimiz</h2>
+            <p className="text-gray-600">Bizi yönlendiren temel prensipler</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {values.map((value, index) => (
+              <div key={index} className="text-center">
+                <div className={`w-16 h-16 ${value.color} rounded-full flex items-center justify-center mx-auto mb-4`}>
+                  {value.icon}
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{value.title}</h3>
+                <p className="text-gray-600">{value.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* EKİBİMİZ */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Ekibimiz</h2>
+            <p className="text-gray-600">Yankı'yı bugünlere getiren yetenekli ekibimiz</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {teamMembers.map((member, index) => (
+              <div key={index} className="bg-white rounded-xl border border-gray-200 p-6 text-center hover:shadow-lg transition-shadow">
+                <div className="text-6xl mb-4">{member.image}</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{member.name}</h3>
+                <p className="text-indigo-600 font-medium mb-3">{member.position}</p>
+                <p className="text-gray-600 text-sm">{member.bio}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* YOL HARİTASI */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Yolculuğumuz</h2>
+            <p className="text-gray-600">Başlangıçtan bugüne kadar olan önemli kilometre taşlarımız</p>
+          </div>
+
+          <div className="relative">
+            {/* Timeline line */}
+            <div className="absolute left-1/2 transform -translate-x-0.5 h-full w-0.5 bg-indigo-200"></div>
+            
+            <div className="space-y-12">
+              {milestones.map((milestone, index) => (
+                <div key={index} className={`flex items-center ${index % 2 === 0 ? 'flex-row-reverse' : ''}`}>
+                  <div className={`w-1/2 ${index % 2 === 0 ? 'pr-8 text-right' : 'pl-8'}`}>
+                    <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+                      <div className="text-indigo-600 font-bold text-lg mb-2">{milestone.year}</div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-3">{milestone.title}</h3>
+                      <p className="text-gray-600">{milestone.description}</p>
+                    </div>
+                  </div>
+                  <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold relative z-10">
+                    {index + 1}
+                  </div>
+                  <div className="w-1/2"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* TEKNOLOJÍ & İNOVASYON */}
+      <section className="py-16 bg-gradient-to-br from-indigo-50 to-purple-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Teknoloji & İnovasyon</h2>
+            <p className="text-gray-600">Yankı'nın güçlü teknoloji altyapısı</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white rounded-xl border border-gray-200 p-8 text-center hover:shadow-lg transition-shadow">
+              <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-6">
+                <Zap className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">AI & Machine Learning</h3>
+              <p className="text-gray-600">
+                En son deep learning algoritmaları ile doğal ve insansı ses üretimi gerçekleştiriyoruz.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-xl border border-gray-200 p-8 text-center hover:shadow-lg transition-shadow">
+              <div className="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-6">
+                <Shield className="w-8 h-8 text-green-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Güvenlik & Gizlilik</h3>
+              <p className="text-gray-600">
+                End-to-end şifreleme ve GDPR uyumlu veri işleme ile verilerinizi koruyoruz.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-xl border border-gray-200 p-8 text-center hover:shadow-lg transition-shadow">
+              <div className="w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-6">
+                <TrendingUp className="w-8 h-8 text-purple-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Scalable Infrastructure</h3>
+              <p className="text-gray-600">
+                Cloud-native mimarisi ile milyonlarca kullanıcıya hizmet verebilecek altyapı.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      {/* CTA SECTION */}
+      <section className="py-16 bg-gradient-to-r from-indigo-600 to-blue-600">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <h2 className="text-3xl font-bold text-white mb-4">
+            Yankı Ailesine Katılmaya Hazır mısınız?
+          </h2>
+          <p className="text-indigo-100 text-lg mb-8">
+            Binlerce içerik üreticisinin tercih ettiği platforma siz de katılın
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href="/register"
+              className="bg-white text-indigo-600 px-8 py-4 rounded-lg font-semibold hover:bg-indigo-50 transition"
+            >
+              Ücretsiz Başla
+            </a>
+            <a
+              href="/contact"
+              className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-indigo-600 transition"
+            >
+              Bizimle İletişime Geç
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+    </div>
   );
 }
