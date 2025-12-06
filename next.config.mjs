@@ -10,21 +10,27 @@ const nextConfig = {
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },
   
-  // RAM tasarrufu
-  productionBrowserSourceMaps: false,
+  // 1. Worker çökmesini engelleyen ayar (Rust derleyicisini kapatır)
+  swcMinify: false,
+
+  // 2. "id undefined" hatasını çözen ayar (ID'yi elle veriyoruz)
+  generateBuildId: async () => {
+    // Her build için benzersiz bir ID üretir
+    return 'build-' + Date.now();
+  },
   
   images: {
     remotePatterns: [{ protocol: 'https', hostname: '**' }],
   },
 
   webpack: (config) => {
-    // 1. Symlink sorununu çözer
+    // Symlink sorununu çözer
     config.resolve.symlinks = false;
 
-    // 2. "@" işaretini src klasörüne bağlar (Import hatasını çözer)
+    // "@" işaretini src klasörüne bağlar (Import hatasını çözer)
     config.resolve.alias['@'] = path.join(__dirname, 'src');
 
-    // 3. ÖNBELLEĞİ KAPAT (İşte "id undefined" hatasını çözen satır bu!)
+    // ÖNBELLEĞİ KAPAT (Cache bozulmasını engeller)
     config.cache = false;
 
     return config;
