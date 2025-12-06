@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Mail, MapPin, Clock, Send, Phone, CheckCircle, Users, Zap, Shield } from 'lucide-react';
 import Navbar from '@/components/Navbar';
-import Footer from '@/Footer';
+import Footer from '@/app/Footer';
 export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: '',
