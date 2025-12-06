@@ -3,8 +3,8 @@
 import React from 'react';
 import { Users, Target, Zap, Shield, Award, TrendingUp, Heart, Globe } from 'lucide-react';
 // DÜZELTME 1: Dosya isimleri küçük harfle (sunucudaki dosya adıyla birebir aynı olmalı)
-import Navbar from '../../components/Navbar';
-import Footer from '../Footer';
+import Navbar from '@components/Navbar';
+import Footer from '@Footer';
 export default function AboutPage() {
   const teamMembers = [
     {
