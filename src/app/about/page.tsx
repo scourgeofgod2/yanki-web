@@ -2,8 +2,10 @@
 
 import React from 'react';
 import { Users, Target, Zap, Shield, Award, TrendingUp, Heart, Globe } from 'lucide-react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/app/Footer';
+// DÜZELTME 1: Dosya isimleri küçük harfle (sunucudaki dosya adıyla birebir aynı olmalı)
+import Navbar from '@/components/navbar';
+// DÜZELTME 2: Footer muhtemelen components klasöründedir, değilse dosya yolunu kontrol et
+import Footer from '@/components/footer'; 
 
 export default function AboutPage() {
   const teamMembers = [
