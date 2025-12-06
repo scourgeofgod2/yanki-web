@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { voices } from '@/lib/voices';
-import { useAudio } from '.@/contexts/AudioProvider';
+import { useAudio } from '@/contexts/AudioProvider';
 import { AudioTrack } from '@/types/audio';
 import { Inter } from 'next/font/google';
 
