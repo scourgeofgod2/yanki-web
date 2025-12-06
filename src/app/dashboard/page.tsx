@@ -6,8 +6,8 @@ import {
   Play, ChevronDown, Sparkles, Wand2, Mic, Compass, History, FileText, Settings, Zap, MoreHorizontal, ArrowUpRight
 } from 'lucide-react';
 import Link from 'next/link';
-import { voices } from '@/lib/voices';
-import { useAudio } from '@/contexts/AudioProvider';
+import { voices } from '../../lib/voices';
+import { useAudio } from '../../contexts/AudioProvider';
 import { AudioTrack } from '@/types/audio';
 import { Inter } from 'next/font/google';
 
