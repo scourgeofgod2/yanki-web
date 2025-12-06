@@ -10,7 +10,7 @@ import {
   Crown, Zap, TrendingUp, RefreshCw, CheckCircle, AlertCircle
 } from 'lucide-react';
 import axios from 'axios';
-import Navbar from '@/components/Navbar';
+import Navbar from '../../components/Navbar';
 
 // DEMO VOICES
 const DEMO_VOICES = [
